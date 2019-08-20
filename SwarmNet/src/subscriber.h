@@ -20,14 +20,14 @@ class Subscriber {
 
         #if PYTHON
         Subscriber(int dist, recv_caller caller, void * usr_f);
-        void init(int dist, recv_caller caller, void * usr_f);
+        void subscriber_init(int dist, recv_caller caller, void * usr_f);
         #else
         #if FUNC
         Subscriber(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback);
-        void init(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback);
+        void subscriber_init(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback);
         #else
         Subscriber(int dist, void (*callback)(unsigned char *, int, int, Meta_t *));
-        void init(int dist, void (*callback)(unsigned char *, int, int, Meta_t *));
+        void subscriber_init(int dist, void (*callback)(unsigned char *, int, int, Meta_t *));
         #endif
         #endif
 

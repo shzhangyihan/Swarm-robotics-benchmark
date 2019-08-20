@@ -9,6 +9,7 @@ typedef struct Meta {
 /* functional parameter */
 #define DEBUG false
 //#define FUNC false
+//#define CLASS mykilobot
 //#define PYTHON false
 
 /* protocal config */
