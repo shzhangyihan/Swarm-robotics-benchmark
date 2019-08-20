@@ -1,4 +1,4 @@
-#include "config.h"
+#include "_config.h"
 
 #if FUNC
 #define publisher_init(chan, func) publisher_init(chan, std::bind(&CLASS::func, this));
