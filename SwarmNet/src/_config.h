@@ -8,8 +8,7 @@ typedef struct Meta {
 
 /* functional parameter */
 #define DEBUG false
-//#define FUNC false
-//#define CLASS mykilobot
+#define FUNC false
 
 /* protocal config */
 #define PKT_SIZE       8
