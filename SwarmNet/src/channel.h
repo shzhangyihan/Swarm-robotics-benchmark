@@ -21,11 +21,6 @@
 #define ERROR_FULL      1
 #define ERROR_EMPTY     1
 
-
-#if PYTHON
-typedef void (*send_caller)(void *user_func);
-#endif
-
 class Channel: Base {
     public:
         void init(int type, int hops, bool listen);
@@ -33,14 +28,10 @@ class Channel: Base {
         
         int subscribe(Subscriber * s);
 
-        #if PYTHON
-        int register_send_success(send_caller caller, void * usr_f);
-        #else
         #if FUNC
         int register_send_success(std::function<void()> callback);
         #else
         int register_send_success(void (*callback)());
-        #endif
         #endif
         
         bool available();
@@ -63,15 +54,10 @@ class Channel: Base {
         int send_pktNum;
         int recv_pktNum;
         bool ready;
-        #if PYTHON
-        send_caller caller;
-        void * sentCallbacks[MAX_PUB_PER_CHAN];
-        #else
         #if FUNC
         std::function<void()> sentCallbacks[MAX_PUB_PER_CHAN];
         #else
         void (*sentCallbacks[MAX_PUB_PER_CHAN])();
-        #endif
         #endif
         Subscriber * subscribers[MAX_SUB_PER_CHAN];
         Packet recvBuffer[BUFF_SIZE_PER_CHAN];

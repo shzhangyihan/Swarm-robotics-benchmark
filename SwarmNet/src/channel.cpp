@@ -39,18 +39,6 @@ int Channel::subscribe(Subscriber * s) {
     return ERROR_FULL;
 }
 
-#if PYTHON
-int Channel::register_send_success(send_caller caller, void * usr_f) {
-    this->caller = caller;
-    for(int i = 0; i < MAX_PUB_PER_CHAN; i++) {
-        if(sentCallbacks[i] == NULL) {
-            sentCallbacks[i] = usr_f;
-            return SUCCESS;
-        }
-    }
-    return ERROR_FULL;
-}
-#else
 #if FUNC
 int Channel::register_send_success(std::function<void()> callback) {
 #else
@@ -64,7 +52,6 @@ int Channel::register_send_success(void (*callback)()) {
     }
     return ERROR_FULL;
 }
-#endif
 
 bool Channel::available() {
     return ready;
@@ -152,11 +139,7 @@ int Channel::next_pkt(Packet *ret) {
         // callback on all sents
         for(int i = 0; i < MAX_PUB_PER_CHAN; i++)
             if(sentCallbacks[i] != NULL)
-                #if PYTHON
-                this->caller(sentCallbacks[i]);
-                #else
                 sentCallbacks[i]();
-                #endif
     }
     if(time_chan) {
         unsigned int cur_time = get_clock();

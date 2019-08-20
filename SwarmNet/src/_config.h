@@ -10,7 +10,6 @@ typedef struct Meta {
 #define DEBUG false
 //#define FUNC false
 //#define CLASS mykilobot
-//#define PYTHON false
 
 /* protocal config */
 #define PKT_SIZE       8
