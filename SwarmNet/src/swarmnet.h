@@ -4,7 +4,6 @@
 #include "packet.h"
 #include "channel.h"
 #include "util.h"
-#include "std_macro.h"
 
 #if FUNC
 #include <functional>
