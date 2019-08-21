@@ -1,6 +1,6 @@
 #pragma once
 
-#include "_config.h"
+#include "../../Driver/Kilobot_simulation/config.h"
 
 #define BYTE           8U
 #define HEADER_BYTE    ((NODE_ID_BITS + MSG_ID_BITS + SEQ_NUM_BITS + CHAN_TYPE_BITS + TTL_BITS + 1 + BYTE - 1) / BYTE)

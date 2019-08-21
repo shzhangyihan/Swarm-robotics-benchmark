@@ -1,6 +1,6 @@
 #pragma once
 #include "../../../src/kilolib.h"
-#include "swarmnet.h"
+#include "../../SwarmNet/src/swarmnet.h"
 #include <math.h>
 
 
@@ -117,8 +117,8 @@ class mykilobot : public kilobot
         set_color(RGB(1,0,0));
 
         c = s.new_channel(2, 2, false);
-        p.init(c, std::bind(&mykilobot::sent, this));
-        sub.init(100, std::bind(&mykilobot::call_back, this, 
+        p.publisher_init(c, std::bind(&mykilobot::sent, this));
+        sub.subscriber_init(100, std::bind(&mykilobot::call_back, this, 
                                  std::placeholders::_1, 
                                  std::placeholders::_2, 
                                  std::placeholders::_3,
