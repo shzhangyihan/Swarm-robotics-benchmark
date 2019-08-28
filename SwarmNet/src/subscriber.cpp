@@ -12,6 +12,11 @@ Subscriber::Subscriber() {
     this->callback = NULL;
 }
 
+bool Subscriber::if_initialized() {
+    if(callback == NULL) return false;
+    else return true;
+}
+
 #if FUNC
 Subscriber::Subscriber(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback) {
     subscriber_init(dist, callback);

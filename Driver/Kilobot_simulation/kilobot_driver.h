@@ -1,7 +1,10 @@
 #pragma once
-#include "../../../simulation/simulation_driver_test/src/kilolib.h"
+#include "../../../Swarm-platforms/simulation/src/kilolib.h"
 #include "../../SwarmNet/src/swarmnet.h"
 #include "std_macro.h"
+
+#define START_USER_PROGRAM class mykilobot : public kilobot_driver {
+#define END_USER_PROGRAM   };
 
 class kilobot_driver : public kilobot
 {

@@ -1,8 +1,4 @@
 #include "packet.h"
-
-
-
-
 #include <stdio.h>
 #include <string.h>
 
@@ -87,12 +83,12 @@ void Packet::init(unsigned char *content, int size, unsigned int nodeId, unsigne
     memset(this->header, 0, sizeof(this->header));
     // create packet from meta data
     memcpy(this->content, content, size);\
-    encode(header, NODE_ID_OFFSET  , NODE_ID_BITS  , nodeId);
-    encode(header, MSG_ID_OFFSET   , MSG_ID_BITS   , msgId);
-    encode(header, SEQ_NUM_OFFSET  , SEQ_NUM_BITS  , seqNum);
-    encode(header, IF_END_OFFSET   , 1             , ifEnd);
-    encode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS, chanNum);
-    encode(header, TTL_OFFSET      , TTL_BITS      , ttl);
+    common::encode(header, NODE_ID_OFFSET  , NODE_ID_BITS  , nodeId);
+    common::encode(header, MSG_ID_OFFSET   , MSG_ID_BITS   , msgId);
+    common::encode(header, SEQ_NUM_OFFSET  , SEQ_NUM_BITS  , seqNum);
+    common::encode(header, IF_END_OFFSET   , 1             , ifEnd);
+    common::encode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS, chanNum);
+    common::encode(header, TTL_OFFSET      , TTL_BITS      , ttl);
 
     #if DEBUG
     printf("== New Packet ccreated! ==\r\n");
@@ -134,7 +130,7 @@ int Packet::to_packet(unsigned char *pkt) {
 }
 
 void Packet::set_node_id(unsigned int id) {
-    encode(header, NODE_ID_OFFSET, NODE_ID_BITS, id);
+    common::encode(header, NODE_ID_OFFSET, NODE_ID_BITS, id);
 }
 
 void Packet::print_data() {
@@ -154,7 +150,7 @@ void Packet::print_data() {
 void Packet::decrease_hop() {
     uint8_t ttl = get_ttl() - 1;
     if(ttl == 0xFF) ttl = 0;
-    encode(header, TTL_OFFSET, TTL_BITS, ttl);
+    common::encode(header, TTL_OFFSET, TTL_BITS, ttl);
 }
 
 void Packet::set_time_bytes(unsigned int time) {
@@ -172,30 +168,30 @@ unsigned char * Packet::get_content() {
 }
 
 unsigned int Packet::get_node_id() {
-    return decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
+    return common::decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
 }
 
 unsigned int Packet::get_msg_id() {
-    return decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
+    return common::decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
 }
 
 unsigned int Packet::get_seq_num() {
-    return decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+    return common::decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
 }
 
 bool Packet::get_if_end() {
-    if(decode(header, IF_END_OFFSET, 1) == 0)
+    if(common::decode(header, IF_END_OFFSET, 1) == 0)
         return false;
     else
         return true;
 }
 
 unsigned int Packet::get_chan_type() {
-    return decode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS);
+    return common::decode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS);
 }
 
 unsigned int Packet::get_ttl() {
-    return decode(header, TTL_OFFSET, TTL_BITS);
+    return common::decode(header, TTL_OFFSET, TTL_BITS);
 }
 
 bool Packet::if_valid() {
