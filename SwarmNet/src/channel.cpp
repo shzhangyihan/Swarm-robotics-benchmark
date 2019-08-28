@@ -145,7 +145,7 @@ int Channel::next_pkt(Packet *ret) {
     if(time_chan) {
         unsigned int cur_time = get_clock();
         unsigned int old_time = ret->get_time_bytes();
-        unsigned int diff_time = clock_diff(old_time, cur_time);
+        unsigned int diff_time = common::clock_diff(old_time, cur_time);
         ret->set_time_bytes(diff_time);
     }
 
@@ -264,7 +264,7 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
             if(time_chan) {
                 // measure the time diff from the time bytes
                 unsigned int prev_time = recvBuffer[assembler[i]].get_time_bytes();
-                unsigned int diff_time = clock_diff(prev_time, cur_time);
+                unsigned int diff_time = common::clock_diff(prev_time, cur_time);
                 if(diff_time > longest_diff_time) longest_diff_time = diff_time;
             }
         }

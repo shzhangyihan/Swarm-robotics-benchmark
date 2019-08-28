@@ -146,18 +146,18 @@ void Swarmnet::receive(unsigned char * pkt, int size, Meta_t * meta) {
 }
 
 bool Swarmnet::check_cache(unsigned char *header) {
-    unsigned int node_id = decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
-    unsigned int msg_id  = decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
-    unsigned int seq_num = decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
-    unsigned int ttl     = decode(header, TTL_OFFSET, TTL_BITS);
+    unsigned int node_id = common::decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
+    unsigned int msg_id  = common::decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
+    unsigned int seq_num = common::decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+    unsigned int ttl     = common::decode(header, TTL_OFFSET, TTL_BITS);
     #if DEBUG
     printf("Check cache -- nodeId: %d msg_id: %d seq_num: %d ttl: %d \n", node_id, msg_id, seq_num, ttl);
     #endif
     for(int i = 0; i < cache_size; i++) {
-        unsigned int check_node_id = decode(send_cache[i], NODE_ID_OFFSET, NODE_ID_BITS);
-        unsigned int check_msg_id  = decode(send_cache[i], MSG_ID_OFFSET, MSG_ID_BITS);
-        unsigned int check_seq_num = decode(send_cache[i], SEQ_NUM_OFFSET, SEQ_NUM_BITS);
-        unsigned int check_ttl     = decode(send_cache[i], TTL_OFFSET, TTL_BITS);
+        unsigned int check_node_id = common::decode(send_cache[i], NODE_ID_OFFSET, NODE_ID_BITS);
+        unsigned int check_msg_id  = common::decode(send_cache[i], MSG_ID_OFFSET, MSG_ID_BITS);
+        unsigned int check_seq_num = common::decode(send_cache[i], SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+        unsigned int check_ttl     = common::decode(send_cache[i], TTL_OFFSET, TTL_BITS);
         if(node_id == check_node_id && msg_id == check_msg_id && seq_num == check_seq_num) {
             #if DEBUG
             printf("Cache hit\n");
