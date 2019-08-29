@@ -1,6 +1,6 @@
 #include "util.h"
 
-unsigned int decode(unsigned char * header, unsigned int offset, unsigned int len) {
+unsigned int common::decode(unsigned char * header, unsigned int offset, unsigned int len) {
     unsigned int ret = 0;
     unsigned int end_bit = offset + len - 1;
     unsigned int cur_index = offset / BYTE;
@@ -28,7 +28,7 @@ unsigned int decode(unsigned char * header, unsigned int offset, unsigned int le
     return ret;
 }
 
-void encode(unsigned char * header, unsigned int offset, unsigned int len, unsigned int data) {
+void common::encode(unsigned char * header, unsigned int offset, unsigned int len, unsigned int data) {
     int end_bit = offset + len - 1;
     int start_index = offset / BYTE;
     int cur_index = end_bit / BYTE;
@@ -51,7 +51,7 @@ void encode(unsigned char * header, unsigned int offset, unsigned int len, unsig
     }
 }
 
-unsigned int clock_diff(unsigned int start, unsigned int end) {
+unsigned int common::clock_diff(unsigned int start, unsigned int end) {
     if(start > end) {
         // based on assumption that if start overflows, end won't overflow
         // assuming the msg processing won't take as long as entire clock overflow 
@@ -60,12 +60,12 @@ unsigned int clock_diff(unsigned int start, unsigned int end) {
     return end - start;
 }
 
-void dummy_lock() {}
+void common::dummy_lock() {}
 
-unsigned int dummy_clock() { return 0; }
+unsigned int common::dummy_clock() { return 0; }
 
-void (*Base::lock)() = dummy_lock;
+void (*Base::lock)() = common::dummy_lock;
 
-void (*Base::unlock)() = dummy_lock;
+void (*Base::unlock)() = common::dummy_lock;
 
-unsigned int (*Base::get_clock)() = dummy_clock;
+unsigned int (*Base::get_clock)() = common::dummy_clock;

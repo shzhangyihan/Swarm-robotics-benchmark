@@ -11,7 +11,8 @@
 class Subscriber {
     public:
         void receive(unsigned char * msg, int size, int hop, Meta_t * meta);
-        
+        bool if_initialized();
+
         Subscriber();
 
         #if FUNC

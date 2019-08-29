@@ -20,37 +20,38 @@ void Channel::init(int type, int hops, bool time_chan) {
     this->send_pktNum = 0;
     this->recv_pktNum = 0;
     this->ready = true;
-    
-    for(int i = 0; i < MAX_PUB_PER_CHAN; i++) sentCallbacks[i] = NULL;
-    for(int i = 0; i < MAX_SUB_PER_CHAN; i++)  subscribers[i] = NULL;
 }
 
 Channel::~Channel() {
     //printf("Freeing Channel\r\n");
 }
 
-int Channel::subscribe(Subscriber * s) {
+#if FUNC
+Subscriber * Channel::new_subscriber(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback) {
+#else
+Subscriber * Channel::new_subscriber(int dist, void (*callback)(unsigned char *, int, int, Meta_t *)) {
+#endif
     for(int i = 0; i < MAX_SUB_PER_CHAN; i++) {
-        if(subscribers[i] == NULL) {
-            subscribers[i] = s;
-            return SUCCESS;
+        if(subscribers[i].if_initialized() == false) {
+            subscribers[i].subscriber_init(dist, callback);
+            return &(subscribers[i]);
         }
     }
-    return ERROR_FULL;
+    return NULL;
 }
 
 #if FUNC
-int Channel::register_send_success(std::function<void()> callback) {
+Publisher * Channel::new_publisher(std::function<void()> callback) {
 #else
-int Channel::register_send_success(void (*callback)()) {
+Publisher * Channel::new_publisher(void (*callback)()) {
 #endif
     for(int i = 0; i < MAX_PUB_PER_CHAN; i++) {
-        if(sentCallbacks[i] == NULL) {
-            sentCallbacks[i] = callback;
-            return SUCCESS;
+        if(publishers[i].if_initialized() == false) {
+            publishers[i].publisher_init(this, callback);
+            return &(publishers[i]);
         }
     }
-    return ERROR_FULL;
+    return NULL;
 }
 
 bool Channel::available() {
@@ -138,13 +139,13 @@ int Channel::next_pkt(Packet *ret) {
         ready = true;
         // callback on all sents
         for(int i = 0; i < MAX_PUB_PER_CHAN; i++)
-            if(sentCallbacks[i] != NULL)
-                sentCallbacks[i]();
+            if(publishers[i].if_initialized() == true)
+                publishers[i].sent_callback();
     }
     if(time_chan) {
         unsigned int cur_time = get_clock();
         unsigned int old_time = ret->get_time_bytes();
-        unsigned int diff_time = clock_diff(old_time, cur_time);
+        unsigned int diff_time = common::clock_diff(old_time, cur_time);
         ret->set_time_bytes(diff_time);
     }
 
@@ -263,7 +264,7 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
             if(time_chan) {
                 // measure the time diff from the time bytes
                 unsigned int prev_time = recvBuffer[assembler[i]].get_time_bytes();
-                unsigned int diff_time = clock_diff(prev_time, cur_time);
+                unsigned int diff_time = common::clock_diff(prev_time, cur_time);
                 if(diff_time > longest_diff_time) longest_diff_time = diff_time;
             }
         }
@@ -310,12 +311,12 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
                 
         // callback on all recvs
         for(int i = 0; i < MAX_SUB_PER_CHAN; i++) {
-            if(subscribers[i] != NULL) {
+            if(subscribers[i].if_initialized() == true) {
                 // TODO:: assuming /0 terminating
                 #if DEBUG
                 printf("Callback on sub %d\r\n", i);
                 #endif
-                subscribers[i]->receive(msg, msgSize, ttl, meta);
+                subscribers[i].receive(msg, msgSize, ttl, meta);
             }
         }
     }
