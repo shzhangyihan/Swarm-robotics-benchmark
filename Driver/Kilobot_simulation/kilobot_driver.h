@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Swarm-platforms/simulation/src/kilolib.h"
+#include "../../../src/kilolib.h"
 #include "../../SwarmNet/src/swarmnet.h"
 #include "std_macro.h"
 
