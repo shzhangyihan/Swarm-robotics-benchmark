@@ -37,7 +37,6 @@ class kilobot_driver : public kilobot {
             //printf("P Recv dist = %d, theta = %f\n", dist, t);
             Meta_t meta;
             meta.dist = dist;
-            meta.theta = t;
             swarmnet.receive(message->data, PKT_SIZE, &meta);
         }
 };
