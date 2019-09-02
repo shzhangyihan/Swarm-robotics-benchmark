@@ -1,8 +1,5 @@
 #include "swarmnet.h"
 
-
-
-
 Swarmnet::Swarmnet() {
     new_id();
     roundRobinIndex = 0;
