@@ -1,12 +1,16 @@
 #pragma once
+#define DEBUG
+
 extern "C" {
     #include "../../../Swarm-platforms/kilobot/kilolib.h"
+    #include "../../../Swarm-platforms/kilobot/debug.h"
 }
 #include "../../SwarmNet/src/swarmnet.h"
 
 #define START_USER_PROGRAM
 #define END_USER_PROGRAM int main() { \
                              kilo_init(); \
+                             debug_init(); \
                              kilo_message_tx = message_tx; \
                              kilo_message_tx_success = message_tx_success;\
                              kilo_message_rx = message_rx; \

@@ -177,10 +177,10 @@ bool Swarmnet::check_cache(unsigned char *header) {
 void Swarmnet::add_cache(unsigned char * header) {
     if(CACHE_SIZE == 0) return;
     #if DEBUG
-    unsigned int node_id = decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
-    unsigned int msg_id  = decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
-    unsigned int seq_num = decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
-    unsigned int ttl     = decode(header, TTL_OFFSET, TTL_BITS);
+    unsigned int node_id = common::decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
+    unsigned int msg_id  = common::decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
+    unsigned int seq_num = common::decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+    unsigned int ttl     = common::decode(header, TTL_OFFSET, TTL_BITS);
     printf("Add cache -- nodeId: %d msg_id: %d seq_num: %d ttl: %d cache_buffer: %d/%d\n", node_id, msg_id, seq_num, ttl, cache_size, CACHE_SIZE);
     #endif
     if(cache_size >= CACHE_SIZE) {
