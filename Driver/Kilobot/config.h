@@ -22,7 +22,7 @@ typedef struct Meta {
 
 /* local memory bounding */
 #define TOTAL_CHAN_NUM      1
-#define BUFF_SIZE_PER_CHAN  30
+#define BUFF_SIZE_PER_CHAN  20
 #define FORWARD_BUFF_SIZE   10
 #define MAX_SUB_PER_CHAN    1
 #define MAX_PUB_PER_CHAN    1
