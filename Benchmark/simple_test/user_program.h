@@ -21,7 +21,7 @@ void loop() {
 
 void setup() {
     strncpy((char*)token, "Hello world!", 12);
-    channel = swarmnet.new_channel(2, 0, false);
+    channel = swarmnet->new_channel(2, 0, false);
     publisher = channel->new_publisher(sent);
     subscriber = channel->new_subscriber(100, call_back);
     publisher->send(token, strlen((char*)token));

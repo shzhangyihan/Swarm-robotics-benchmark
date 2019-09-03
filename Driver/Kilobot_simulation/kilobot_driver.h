@@ -1,6 +1,6 @@
 #pragma once
 #include "../../../Swarm-platforms/simulation/src/kilolib.h"
-#include "../../SwarmNet/src/swarmnet.h"
+#include "../../SwarmOS/src/swarmos.h"
 #include "std_macro.h"
 
 #define START_USER_PROGRAM class mykilobot : public kilobot_driver {
@@ -15,7 +15,8 @@
 class kilobot_driver : public kilobot {
     public:
         message_t message;
-        Swarmnet swarmnet;
+        SwarmOS swarmos;
+        Swarmnet * swarmnet;
 
         //executed on successfull message send
         void message_tx_success() { }
@@ -23,7 +24,7 @@ class kilobot_driver : public kilobot {
         //sends message at fixed rate
         message_t *message_tx() {
             message.type = NORMAL;
-            int ret = swarmnet.next_pkt(message.data);
+            int ret = swarmnet->next_pkt(message.data);
             message.crc = message_crc(&message);
             if(ret == 0) return NULL;
             static int r = rand() % 100;
@@ -37,6 +38,10 @@ class kilobot_driver : public kilobot {
             //printf("P Recv dist = %d, theta = %f\n", dist, t);
             Meta_t meta;
             meta.dist = dist;
-            swarmnet.receive(message->data, PKT_SIZE, &meta);
+            swarmnet->receive(message->data, PKT_SIZE, &meta);
+        }
+
+        kilobot_driver() {
+            swarmnet = swarmos.get_swarmnet();
         }
 };
