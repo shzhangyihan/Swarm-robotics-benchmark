@@ -18,7 +18,7 @@ void loop() {
 }
 
 void setup() {
-    rand_id = rand_hard();
+    rand_id = rand();
     strncpy((char*)token, " Hello world!", 13);
     token[0] = rand_id;
     channel = swarmnet->new_channel(2, 0, false);
