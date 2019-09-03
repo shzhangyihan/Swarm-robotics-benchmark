@@ -1,8 +1,5 @@
 #include "swarmnet.h"
 
-
-
-
 Swarmnet::Swarmnet() {
     new_id();
     roundRobinIndex = 0;
@@ -40,13 +37,9 @@ int Swarmnet::next_pkt(unsigned char * pkt) {
     int flag;
     for(int i = roundRobinIndex; i < roundRobinIndex + chan_num + 1; i++) {
         if(i == chan_num) {
-            #if DEBUG
-            printf("Pulling from forward buffer\r\n");
-            #endif
+            SWARM_LOG("Pulling from forward buffer");
             if(forward_size == 0) {
-                #if DEBUG
-                printf("Forward buff empty\r\n");
-                #endif
+                SWARM_LOG("Forward buff empty");
                 flag = SUCCESS + 1;
             }
             else {
@@ -58,27 +51,18 @@ int Swarmnet::next_pkt(unsigned char * pkt) {
         }
         else {
             int index = i % (chan_num + 1);
-            #if DEBUG
-            printf("Pulling from channel %d\r\n", chans[index].get_type());
-            #endif
+            SWARM_LOG("Pulling from channel %d", chans[index].get_type());
             flag = chans[index].next_pkt(&send);
-            #if DEBUG
-            printf("Flag is %d\r\n", flag);
-            #endif
             if(flag == SUCCESS) {
                 send.set_node_id(nodeId);
             }
             else {
-                #if DEBUG
-                printf("Channel %d buff empty\n", chans[index].get_type());
-                #endif
+                SWARM_LOG("Channel %d buff empty", chans[index].get_type());
             }
         }
         if(flag == SUCCESS) {
             // next packet ready to send
-            #if DEBUG
-            printf("Pkt ready\n");
-            #endif
+            SWARM_LOG("Next packet ready to send");
             int size;
             size = send.to_packet(pkt);
             roundRobinIndex = (i + 1) % (chan_num + 1);
@@ -103,28 +87,20 @@ void Swarmnet::receive(unsigned char * pkt, int size, Meta_t * meta) {
     int nodeId  = newPkt.get_node_id();
     int ttl     = newPkt.get_ttl();
 
-    #if DEBUG
     int msgId    = newPkt.get_msg_id();
     int seqNum   = newPkt.get_seq_num();
-    printf("++++++++++++++++++++++++++++++++++\n");
-    printf("Pkg received: %d, %d, %d, %d, %d\n", nodeId, msgId, seqNum, chanNum, ttl);
-    printf("++++++++++++++++++++++++++++++++++\n");
-    #endif
+    SWARM_LOG("Pkg received: %d, %d, %d, %d, %d", nodeId, msgId, seqNum, chanNum, ttl);
 
     if(check_cache(pkt)) {
         // already in cache, abort
-        #if DEBUG
-        printf("Pkt cached already, abort\n");
-        #endif
+        SWARM_LOG("Pkt cached already, abort");
         return;
     }
 
     // id collision, change self id
     if(nodeId == this->nodeId) {
-        #if DEBUG
-        printf("!!!!! NodeId collision !!!!!\n");
-        #endif
         new_id();
+        SWARM_LOG("NodeId collision, changed to new id: %d", this->nodeId);
     }
 
     // if hopCount > 0, store in forward
@@ -146,26 +122,20 @@ void Swarmnet::receive(unsigned char * pkt, int size, Meta_t * meta) {
 }
 
 bool Swarmnet::check_cache(unsigned char *header) {
-    unsigned int node_id = decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
-    unsigned int msg_id  = decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
-    unsigned int seq_num = decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
-    unsigned int ttl     = decode(header, TTL_OFFSET, TTL_BITS);
-    #if DEBUG
-    printf("Check cache -- nodeId: %d msg_id: %d seq_num: %d ttl: %d \n", node_id, msg_id, seq_num, ttl);
-    #endif
+    unsigned int node_id = common::decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
+    unsigned int msg_id  = common::decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
+    unsigned int seq_num = common::decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+    unsigned int ttl     = common::decode(header, TTL_OFFSET, TTL_BITS);
+    SWARM_LOG("Check cache -- nodeId: %d msg_id: %d seq_num: %d ttl: %d", node_id, msg_id, seq_num, ttl);
     for(int i = 0; i < cache_size; i++) {
-        unsigned int check_node_id = decode(send_cache[i], NODE_ID_OFFSET, NODE_ID_BITS);
-        unsigned int check_msg_id  = decode(send_cache[i], MSG_ID_OFFSET, MSG_ID_BITS);
-        unsigned int check_seq_num = decode(send_cache[i], SEQ_NUM_OFFSET, SEQ_NUM_BITS);
-        unsigned int check_ttl     = decode(send_cache[i], TTL_OFFSET, TTL_BITS);
+        unsigned int check_node_id = common::decode(send_cache[i], NODE_ID_OFFSET, NODE_ID_BITS);
+        unsigned int check_msg_id  = common::decode(send_cache[i], MSG_ID_OFFSET, MSG_ID_BITS);
+        unsigned int check_seq_num = common::decode(send_cache[i], SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+        unsigned int check_ttl     = common::decode(send_cache[i], TTL_OFFSET, TTL_BITS);
         if(node_id == check_node_id && msg_id == check_msg_id && seq_num == check_seq_num) {
-            #if DEBUG
-            printf("Cache hit\n");
-            #endif
+            //SWARM_LOG("Cache hit");
             if(ttl > check_ttl) {
-                #if DEBUG
-                printf("Need to update ttl\n");
-                #endif
+                //SWARM_LOG("Need to update ttl\n");
                 memcpy(send_cache[i], header, HEADER_BYTE * sizeof(unsigned char));
                 return false;
             }
@@ -179,18 +149,14 @@ bool Swarmnet::check_cache(unsigned char *header) {
 
 void Swarmnet::add_cache(unsigned char * header) {
     if(CACHE_SIZE == 0) return;
-    #if DEBUG
-    unsigned int node_id = decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
-    unsigned int msg_id  = decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
-    unsigned int seq_num = decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
-    unsigned int ttl     = decode(header, TTL_OFFSET, TTL_BITS);
-    printf("Add cache -- nodeId: %d msg_id: %d seq_num: %d ttl: %d cache_buffer: %d/%d\n", node_id, msg_id, seq_num, ttl, cache_size, CACHE_SIZE);
-    #endif
+    unsigned int node_id = common::decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
+    unsigned int msg_id  = common::decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
+    unsigned int seq_num = common::decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+    unsigned int ttl     = common::decode(header, TTL_OFFSET, TTL_BITS);
+    SWARM_LOG("Add cache -- nodeId: %d msg_id: %d seq_num: %d ttl: %d cache_buffer: %d/%d", node_id, msg_id, seq_num, ttl, cache_size, CACHE_SIZE);
     if(cache_size >= CACHE_SIZE) {
         // cache full
-        #if DEBUG
-        printf("Cache full, discard oldest\n");
-        #endif
+        //SWARM_LOG("Cache full, discard oldest");
         memmove(send_cache, send_cache + 1, (cache_size - 1) * HEADER_BYTE * sizeof(unsigned char));
         cache_size--;
     }

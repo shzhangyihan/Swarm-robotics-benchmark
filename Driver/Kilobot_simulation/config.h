@@ -3,12 +3,12 @@
 /* call back meta data struct */
 typedef struct Meta {
 	int dist;
-	float theta;
 } Meta_t;
 
 /* functional parameter */
-#define DEBUG false
-#define FUNC false
+#define DEBUG true
+#define FUNC true
+#define CLASS mykilobot
 
 /* protocal config */
 #define PKT_SIZE       8

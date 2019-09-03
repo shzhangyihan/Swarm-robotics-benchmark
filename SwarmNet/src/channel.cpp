@@ -20,51 +20,38 @@ void Channel::init(int type, int hops, bool time_chan) {
     this->send_pktNum = 0;
     this->recv_pktNum = 0;
     this->ready = true;
-    
-    for(int i = 0; i < MAX_PUB_PER_CHAN; i++) sentCallbacks[i] = NULL;
-    for(int i = 0; i < MAX_SUB_PER_CHAN; i++)  subscribers[i] = NULL;
 }
 
 Channel::~Channel() {
-    //printf("Freeing Channel\r\n");
 }
 
-int Channel::subscribe(Subscriber * s) {
-    for(int i = 0; i < MAX_SUB_PER_CHAN; i++) {
-        if(subscribers[i] == NULL) {
-            subscribers[i] = s;
-            return SUCCESS;
-        }
-    }
-    return ERROR_FULL;
-}
-
-#if PYTHON
-int Channel::register_send_success(send_caller caller, void * usr_f) {
-    this->caller = caller;
-    for(int i = 0; i < MAX_PUB_PER_CHAN; i++) {
-        if(sentCallbacks[i] == NULL) {
-            sentCallbacks[i] = usr_f;
-            return SUCCESS;
-        }
-    }
-    return ERROR_FULL;
-}
-#else
 #if FUNC
-int Channel::register_send_success(std::function<void()> callback) {
+Subscriber * Channel::new_subscriber(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback) {
 #else
-int Channel::register_send_success(void (*callback)()) {
+Subscriber * Channel::new_subscriber(int dist, void (*callback)(unsigned char *, int, int, Meta_t *)) {
 #endif
-    for(int i = 0; i < MAX_PUB_PER_CHAN; i++) {
-        if(sentCallbacks[i] == NULL) {
-            sentCallbacks[i] = callback;
-            return SUCCESS;
+    for(int i = 0; i < MAX_SUB_PER_CHAN; i++) {
+        if(subscribers[i].if_initialized() == false) {
+            subscribers[i].subscriber_init(dist, callback);
+            return &(subscribers[i]);
         }
     }
-    return ERROR_FULL;
+    return NULL;
 }
+
+#if FUNC
+Publisher * Channel::new_publisher(std::function<void()> callback) {
+#else
+Publisher * Channel::new_publisher(void (*callback)()) {
 #endif
+    for(int i = 0; i < MAX_PUB_PER_CHAN; i++) {
+        if(publishers[i].if_initialized() == false) {
+            publishers[i].publisher_init(this, callback);
+            return &(publishers[i]);
+        }
+    }
+    return NULL;
+}
 
 bool Channel::available() {
     return ready;
@@ -75,13 +62,9 @@ bool Channel::overflow_status() {
 }
 
 void Channel::print_channel_status() {
-    printf("Channel %d\r\n", get_type());
-    printf("Send Buffer Status: (%d / %d)\r\n", (send_pktNum - send_index), MAX_BUFF);
-    /*
-    for(int i =  send_index; i < send_pktNum; i++) {
-        printf("")
-    }*/
-    printf("Recv Buffer Status: (%d / %d)\r\n", recv_pktNum, BUFF_SIZE_PER_CHAN);
+    SWARM_LOG("Channel %d", get_type());
+    SWARM_LOG("Send Buffer Status: (%d / %d)", (send_pktNum - send_index), MAX_BUFF);
+    SWARM_LOG("Recv Buffer Status: (%d / %d)", recv_pktNum, BUFF_SIZE_PER_CHAN);
 }
 
 int Channel::send(unsigned char * msg, int msgSize) {
@@ -134,9 +117,7 @@ int Channel::send(unsigned char * msg, int msgSize) {
 
 int Channel::next_pkt(Packet *ret) {
     // buffer empty
-    #if DEBUG
-    printf("send_pktNum = %d\r\n", send_pktNum);
-    #endif
+    SWARM_LOG("Start fetching next packet %d from channel %d", send_pktNum, this->get_type());
     if(send_pktNum == 0) return ERROR_EMPTY;
     
     memcpy(ret, &sendBuffer[send_index], sizeof(Packet));
@@ -151,17 +132,13 @@ int Channel::next_pkt(Packet *ret) {
         ready = true;
         // callback on all sents
         for(int i = 0; i < MAX_PUB_PER_CHAN; i++)
-            if(sentCallbacks[i] != NULL)
-                #if PYTHON
-                this->caller(sentCallbacks[i]);
-                #else
-                sentCallbacks[i]();
-                #endif
+            if(publishers[i].if_initialized() == true)
+                publishers[i].sent_callback();
     }
     if(time_chan) {
         unsigned int cur_time = get_clock();
         unsigned int old_time = ret->get_time_bytes();
-        unsigned int diff_time = clock_diff(old_time, cur_time);
+        unsigned int diff_time = common::clock_diff(old_time, cur_time);
         ret->set_time_bytes(diff_time);
     }
 
@@ -180,9 +157,7 @@ void Channel::receive(Packet * newPkt, Meta_t * meta) {
            recvBuffer[i].get_seq_num() == seqNum &&
            recvBuffer[i].get_ttl()     == ttl) {
             // delete duplicate
-            #if DEBUG
-            printf("Find duplicate at %d\n", i);
-            #endif
+            SWARM_LOG("Find duplicate at %d", i);
             if(i != recv_pktNum - 1)
                 // dont need to move if its the last pkt
                 memmove(recvBuffer + i, recvBuffer + i + 1, 
@@ -218,9 +193,7 @@ void Channel::receive(Packet * newPkt, Meta_t * meta) {
         recvBuffer[recv_pktNum].set_time_bytes(diff_time);
     }
     recv_pktNum++;
-    #if DEBUG
-    printf("Pkt num after insert: %d\n", recv_pktNum);
-    #endif
+    SWARM_LOG("Pkt num after insert: %d", recv_pktNum);
 
     try_merge(nodeId, msgId, ttl, meta);
 }
@@ -230,10 +203,7 @@ int Channel::get_type() {
 }
 
 void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
-    #if DEBUG
-    printf("Try merge!!\n");
-    printf("Buffer:\n");
-    #endif
+    SWARM_LOG("Try merge!!");
     for(int i = 0; i < MAX_BUFF; i++)
         assembler[i] = -1;
     
@@ -251,24 +221,18 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
         if(assembler[i] == -1) {
             break;
         }
-        #if DEBUG
-        printf("%d at %d\n", i, assembler[i]);
-        #endif
+        SWARM_LOG("%d at %d", i, assembler[i]);
         final_pkt = i;
     }
     
-    #if DEBUG
-    printf("Final pkt at %d; if_end? %d\n", final_pkt, recvBuffer[assembler[final_pkt]].get_if_end());
-    #endif
+    SWARM_LOG("Final pkt at %d; if_end? %d", final_pkt, recvBuffer[assembler[final_pkt]].get_if_end());
     
     unsigned int longest_diff_time = 0;
     unsigned int cur_time = get_clock();
     // if all continuous and is finished, then merge
     if(final_pkt != -1 && recvBuffer[assembler[final_pkt]].get_if_end()) {
-        #if DEBUG
-        printf("!!! Start merging msg !!!\n");
-        printf("Total size: %d\n", final_pkt + 1);
-        #endif
+        SWARM_LOG("!!! Start merging msg !!!");
+        SWARM_LOG("Total size: %d", final_pkt + 1);
         int payload_byte = PAYLOAD_BYTE;
         if(time_chan) {
             payload_byte = payload_byte - TIMER_BYTE;
@@ -280,30 +244,29 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
             if(time_chan) {
                 // measure the time diff from the time bytes
                 unsigned int prev_time = recvBuffer[assembler[i]].get_time_bytes();
-                unsigned int diff_time = clock_diff(prev_time, cur_time);
+                unsigned int diff_time = common::clock_diff(prev_time, cur_time);
                 if(diff_time > longest_diff_time) longest_diff_time = diff_time;
             }
         }
 
-        #if DEBUG
-        printf("$$$$$$$ Msg formed $$$$$$$\n");
+        SWARM_LOG("Msg formed: %.*s", msgSize, msg);
+        /*
         for(int i = 0; i < msgSize; i++) {
             printf("%d %c\n", i, msg[i]);
         }
-        #endif
+        */
         if(time_chan) {
-            printf("Timer channel msg formed, time diff = %d\n", longest_diff_time);
+            SWARM_LOG("Timer channel msg formed, time diff = %d", longest_diff_time);
         }
         overflowCounter = 0;
         overflowFlag = false;
-        
-        #if DEBUG
+        /*
         printf("?????   BEFORE REVERSELY DELETE\n");
         // reversely delete the pkts
         for(int i = 0; i < (final_pkt + 1); i++) {
             printf("Assembler[%d] = %d\n", i, assembler[i]);
         }
-        #endif
+        */
         for(int i = 0; i < (final_pkt + 1); i++) {
             int max_index = -1;
             int ass_index = -1;
@@ -313,26 +276,21 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
                     max_index = assembler[j];
                 }
             }
-            #if DEBUG
+            /*
             printf("Max index = %d, Ass index = %d, pkt Num = %d\n", max_index, ass_index, recv_pktNum);
-            #endif
+            */
             assembler[ass_index] = -1;
             memmove(recvBuffer + max_index, recvBuffer + max_index + 1, 
                     (recv_pktNum - max_index - 1) * sizeof(Packet));
             recv_pktNum--;
         }
-        #if DEBUG
-        printf("!!!!!   AFTER REVERSELY DELETE\n");
-        #endif
                 
         // callback on all recvs
         for(int i = 0; i < MAX_SUB_PER_CHAN; i++) {
-            if(subscribers[i] != NULL) {
+            if(subscribers[i].if_initialized() == true) {
                 // TODO:: assuming /0 terminating
-                #if DEBUG
-                printf("Callback on sub %d\r\n", i);
-                #endif
-                subscribers[i]->receive(msg, msgSize, ttl, meta);
+                SWARM_LOG("Callback on sub %d", i);
+                subscribers[i].receive(msg, msgSize, ttl, meta);
             }
         }
     }

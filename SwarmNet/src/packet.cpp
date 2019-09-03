@@ -1,8 +1,4 @@
 #include "packet.h"
-
-
-
-
 #include <stdio.h>
 #include <string.h>
 
@@ -21,7 +17,8 @@ Packet::Packet(unsigned char *content, int size, unsigned int nodeId, unsigned i
 
 void Packet::init(unsigned char *pkt) {
     // create packet from raw packet
-    #if DEBUG
+    SWARM_LOG("Create packet from raw packet");
+    /*
     printf("== New Packet arrived! ==\r\n");
     // print out raw packet
     printf("*************************\r\n");
@@ -38,7 +35,7 @@ void Packet::init(unsigned char *pkt) {
         printf("  %c\r\n", n);
     }
     printf("*************************\r\n");
-    #endif
+    */
 
     valid = true;
     #if WITH_CRC
@@ -46,21 +43,15 @@ void Packet::init(unsigned char *pkt) {
         // check if CRC match
         int c = crc(pkt, PKT_SIZE - CRC_BYTE);
 
-        #if DEBUG
-        printf("CRC checking ...\r\n");
-        printf("CRC_in = %d; CRC_check = %d\r\n", int(pkt[PKT_SIZE - CRC_BYTE]), c);
-        #endif
+        SWARM_LOG("CRC checking ...\r\n");
+        SWARM_LOG("CRC_in = %d; CRC_check = %d\r\n", int(pkt[PKT_SIZE - CRC_BYTE]), c);
 
         if(pkt[PKT_SIZE - CRC_BYTE] == c) {
-            #if DEBUG
-            printf("CRC passed\r\n");
-            #endif
+            SWARM_LOG("CRC passed\r\n");
             valid = true;
         }
         else {
-            #if DEBUG
-            printf("CRC failed, abort!\r\n");
-            #endif
+            SWARM_LOG("CRC failed, abort!\r\n");
             valid = false;
             return;
         }
@@ -75,9 +66,7 @@ void Packet::init(unsigned char *pkt) {
     memcpy(content, pkt + HEADER_BYTE, PKT_SIZE - HEADER_BYTE);
     #endif
     
-    #if DEBUG
     print_data();
-    #endif
 }
 
 void Packet::init(unsigned char *content, int size, unsigned int nodeId, unsigned int msgId,
@@ -87,17 +76,15 @@ void Packet::init(unsigned char *content, int size, unsigned int nodeId, unsigne
     memset(this->header, 0, sizeof(this->header));
     // create packet from meta data
     memcpy(this->content, content, size);\
-    encode(header, NODE_ID_OFFSET  , NODE_ID_BITS  , nodeId);
-    encode(header, MSG_ID_OFFSET   , MSG_ID_BITS   , msgId);
-    encode(header, SEQ_NUM_OFFSET  , SEQ_NUM_BITS  , seqNum);
-    encode(header, IF_END_OFFSET   , 1             , ifEnd);
-    encode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS, chanNum);
-    encode(header, TTL_OFFSET      , TTL_BITS      , ttl);
+    common::encode(header, NODE_ID_OFFSET  , NODE_ID_BITS  , nodeId);
+    common::encode(header, MSG_ID_OFFSET   , MSG_ID_BITS   , msgId);
+    common::encode(header, SEQ_NUM_OFFSET  , SEQ_NUM_BITS  , seqNum);
+    common::encode(header, IF_END_OFFSET   , 1             , ifEnd);
+    common::encode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS, chanNum);
+    common::encode(header, TTL_OFFSET      , TTL_BITS      , ttl);
 
-    #if DEBUG
-    printf("== New Packet ccreated! ==\r\n");
+    SWARM_LOG("Create packet from meta data");
     print_data();
-    #endif
 }
 
 Packet::~Packet() {
@@ -113,7 +100,7 @@ int Packet::to_packet(unsigned char *pkt) {
     #endif
 
     // print out raw packet
-    #if DEBUG
+    /*
     printf("*************************\r\n");
     for(int i = 0; i < PKT_SIZE; i++) {
         unsigned char n = pkt[i];
@@ -128,33 +115,26 @@ int Packet::to_packet(unsigned char *pkt) {
         printf("  %c\r\n", n);
     }
     printf("*************************\r\n");
-    #endif
+    */
 
     return PKT_SIZE;
 }
 
 void Packet::set_node_id(unsigned int id) {
-    encode(header, NODE_ID_OFFSET, NODE_ID_BITS, id);
+    common::encode(header, NODE_ID_OFFSET, NODE_ID_BITS, id);
 }
 
 void Packet::print_data() {
     // print out meta data
-    printf("*************************\r\n");
-    printf("Size    : %d\r\n", PAYLOAD_BYTE);
-    printf("Node id : %d\r\n", get_node_id());
-    printf("Msg id  : %d\r\n", get_msg_id());
-    printf("Seq num : %d\r\n", get_seq_num());
-    printf("If end  : %d\r\n", get_if_end());
-    printf("Channal : %d\r\n", get_chan_type());
-    printf("TTL     : %d\r\n", get_ttl());
-    printf("Message : %.*s\r\n", PAYLOAD_BYTE, content);
-    printf("*************************\r\n");
+    SWARM_LOG("Size %d; Node id %d; Msg id %d; Seq num %d; If end %d; Channel %d; TTL %d", \
+              PAYLOAD_BYTE, get_node_id(), get_msg_id(), get_seq_num(), get_if_end(), get_chan_type(), get_ttl());
+    SWARM_LOG("Message: %.*s", PAYLOAD_BYTE, content);
 }
 
 void Packet::decrease_hop() {
     uint8_t ttl = get_ttl() - 1;
     if(ttl == 0xFF) ttl = 0;
-    encode(header, TTL_OFFSET, TTL_BITS, ttl);
+    common::encode(header, TTL_OFFSET, TTL_BITS, ttl);
 }
 
 void Packet::set_time_bytes(unsigned int time) {
@@ -172,30 +152,30 @@ unsigned char * Packet::get_content() {
 }
 
 unsigned int Packet::get_node_id() {
-    return decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
+    return common::decode(header, NODE_ID_OFFSET, NODE_ID_BITS);
 }
 
 unsigned int Packet::get_msg_id() {
-    return decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
+    return common::decode(header, MSG_ID_OFFSET, MSG_ID_BITS);
 }
 
 unsigned int Packet::get_seq_num() {
-    return decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
+    return common::decode(header, SEQ_NUM_OFFSET, SEQ_NUM_BITS);
 }
 
 bool Packet::get_if_end() {
-    if(decode(header, IF_END_OFFSET, 1) == 0)
+    if(common::decode(header, IF_END_OFFSET, 1) == 0)
         return false;
     else
         return true;
 }
 
 unsigned int Packet::get_chan_type() {
-    return decode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS);
+    return common::decode(header, CHAN_TYPE_OFFSET, CHAN_TYPE_BITS);
 }
 
 unsigned int Packet::get_ttl() {
-    return decode(header, TTL_OFFSET, TTL_BITS);
+    return common::decode(header, TTL_OFFSET, TTL_BITS);
 }
 
 bool Packet::if_valid() {
@@ -211,28 +191,20 @@ unsigned int Packet::get_time_bytes() {
     #endif
     // clear the potential dirty bits
     ret = ret & (~(~(0U) << TIMER_BITS));
-    #if DEBUG
-    printf("Get timer: %d\n", ret);
-    #endif
+    SWARM_LOG("Get timer: %d", ret);
     return ret;
 }
 
 unsigned char Packet::crc_check(unsigned char *pkt, int size, int in_crc) {
     // check CRC match
-    #if DEBUG
-    printf("CRC checking ...\r\n");
-    #endif
+    SWARM_LOG("CRC checking ...");
     int c = crc(pkt, size);
     if(in_crc == c) {
-        #if DEBUG
-        printf("CRC passed\r\n");
-        #endif
+        SWARM_LOG("CRC passed");
         return true;
     }
     else {
-        #if DEBUG
-        printf("CRC failed, abort!\r\n");
-        #endif
+        SWARM_LOG("CRC failed, abort!");
         return false;
     }
 }

@@ -1,35 +1,33 @@
 #pragma once
-#include "channel.h"
+//#include "channel.h"
 #include "util.h"
 
 #if FUNC
 #include <functional>
 #endif
 
-#if PYTHON
-typedef void (*send_caller)(void *user_func);
-#endif
-
 class Publisher {
     public:
         int send(unsigned char * msg, int msgSize);
+        void sent_callback();
         bool available();
+        bool if_initialized();
 
         Publisher();
         
-        #if PYTHON
-        Publisher(Channel * chan, send_caller caller, void * usr_f);
-        void publisher_init(Channel * chan, send_caller caller, void * usr_f);
-        #else
         #if FUNC
-        Publisher(Channel * chan, std::function<void()> callback);
-        void publisher_init(Channel * chan, std::function<void()> callback);
+        Publisher(void * chan, std::function<void()> callback);
+        void publisher_init(void * chan, std::function<void()> callback);
         #else
-        Publisher(Channel * chan, void (*callback)());
-        void publisher_init(Channel * chan, void (*callback)());
-        #endif
+        Publisher(void * chan, void (*callback)());
+        void publisher_init(void * chan, void (*callback)());
         #endif
 
     private:
-        Channel * chan;
+        void * chan;
+        #if FUNC
+        std::function<void()> callback;
+        #else
+        void (*callback)();
+        #endif
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include "subscriber.h"
+#include "publisher.h"
 #include "packet.h"
 #include "util.h"
 
@@ -21,26 +22,17 @@
 #define ERROR_FULL      1
 #define ERROR_EMPTY     1
 
-
-#if PYTHON
-typedef void (*send_caller)(void *user_func);
-#endif
-
 class Channel: Base {
     public:
         void init(int type, int hops, bool listen);
         int send(unsigned char * msg, int msgSize);
         
-        int subscribe(Subscriber * s);
-
-        #if PYTHON
-        int register_send_success(send_caller caller, void * usr_f);
-        #else
         #if FUNC
-        int register_send_success(std::function<void()> callback);
+        Subscriber * new_subscriber(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback);
+        Publisher * new_publisher(std::function<void()> callback);
         #else
-        int register_send_success(void (*callback)());
-        #endif
+        Subscriber * new_subscriber(int dist, void (*callback)(unsigned char *, int, int, Meta_t *));
+        Publisher * new_publisher(void (*callback)());
         #endif
         
         bool available();
@@ -63,17 +55,8 @@ class Channel: Base {
         int send_pktNum;
         int recv_pktNum;
         bool ready;
-        #if PYTHON
-        send_caller caller;
-        void * sentCallbacks[MAX_PUB_PER_CHAN];
-        #else
-        #if FUNC
-        std::function<void()> sentCallbacks[MAX_PUB_PER_CHAN];
-        #else
-        void (*sentCallbacks[MAX_PUB_PER_CHAN])();
-        #endif
-        #endif
-        Subscriber * subscribers[MAX_SUB_PER_CHAN];
+        Publisher publishers[MAX_PUB_PER_CHAN];
+        Subscriber subscribers[MAX_SUB_PER_CHAN];
         Packet recvBuffer[BUFF_SIZE_PER_CHAN];
         Packet sendBuffer[MAX_PKT_PER_MSG];
         int assembler[MAX_PKT_PER_MSG];

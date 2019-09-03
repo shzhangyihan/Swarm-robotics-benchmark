@@ -1,39 +1,5 @@
 #include "subscriber.h"
 
-
-
-
-
-
-#if PYTHON
-
-void Subscriber::receive(unsigned char * msg, int size, int hop, Meta_t * meta) {
-    //if(dist < this->dist && this->caller != NULL) {
-    if(this->caller != NULL) {
-        #if DEBUG
-        printf("Sub callback\r\n");
-        #endif
-        this->caller(usr_f, msg, size, hop, meta);
-    }
-}
-
-Subscriber::Subscriber() {
-    this->dist = 0;
-    this->caller = NULL;
-}
-
-Subscriber::Subscriber(int dist, recv_caller caller, void * usr_f) {
-    subscriber_init(dist, caller, usr_f);
-}
-
-void Subscriber::subscriber_init(int dist, recv_caller caller, void * usr_f) {
-    this->dist = dist;
-    this->caller = caller;
-    this->usr_f = usr_f;
-}
-
-#else
-
 void Subscriber::receive(unsigned char * msg, int size, int hop, Meta_t * meta) {
     //if(dist < this->dist && this->callback != NULL) {
     if(this->callback != NULL) {
@@ -44,6 +10,11 @@ void Subscriber::receive(unsigned char * msg, int size, int hop, Meta_t * meta) 
 Subscriber::Subscriber() {
     this->dist = 0;
     this->callback = NULL;
+}
+
+bool Subscriber::if_initialized() {
+    if(callback == NULL) return false;
+    else return true;
 }
 
 #if FUNC
@@ -64,5 +35,4 @@ void Subscriber::subscriber_init(int dist, void (*callback)(unsigned char *, int
     this->callback = callback;
 }
 #endif
-#endif 
 
