@@ -6,7 +6,7 @@ typedef struct Meta {
 } Meta_t;
 
 /* functional parameter */
-#define DEBUG true
+#define DEBUG false
 #define FUNC false
 #define CLASS mykilobot
 

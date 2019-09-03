@@ -30,7 +30,7 @@
 #define TOTAL_MEM_USAGE  (BUFF_MEM_USAGE + CACHE_MEM_USAGE)
 
 #if DEBUG
-#define SWARM_LOG(...) printf("(%s) ", __PRETTY_FUNCTION__); printf(__VA_ARGS__); printf("\r\n");
+#define SWARM_LOG(...) printf("(%s) ", __func__); printf(__VA_ARGS__); printf("\r\n");
 #else
 #define SWARM_LOG(...)
 #endif
