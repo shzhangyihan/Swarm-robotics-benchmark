@@ -22,7 +22,7 @@
 #define ERROR_FULL      1
 #define ERROR_EMPTY     1
 
-class Channel: Base {
+class Channel {
     public:
         void init(int type, int hops, bool listen);
         int send(unsigned char * msg, int msgSize);
@@ -47,7 +47,10 @@ class Channel: Base {
         Channel(int type, int hops, bool time_chan);
         ~Channel();
 
+        void set_common_sys(Common_system * common_sys);
+
     private:
+        Common_system * common_sys;
         int type;
         int hops;
         bool time_chan;

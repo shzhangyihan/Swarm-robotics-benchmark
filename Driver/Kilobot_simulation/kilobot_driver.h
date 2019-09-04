@@ -1,6 +1,6 @@
 #pragma once
-#include "../../../Swarm-platforms/simulation/src/kilolib.h"
-#include "../../SwarmOS/src/swarmos.h"
+#include "../../../src/kilolib.h"
+#include "../../SwarmNet/src/swarmnet.h"
 #include "std_macro.h"
 
 #define START_USER_PROGRAM class mykilobot : public kilobot_driver {
@@ -40,8 +40,13 @@ class kilobot_driver : public kilobot {
             meta.dist = dist;
             swarmnet->receive(message->data, PKT_SIZE, &meta);
         }
+        
+        unsigned int get_clock() {
+            return (unsigned int) kilo_ticks;
+        }
 
         kilobot_driver() {
+            swarmos.set_common_sys_get_clock(std::bind(&kilobot_driver::get_clock, this));
             swarmnet = swarmos.get_swarmnet();
         }
 };

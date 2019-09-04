@@ -10,6 +10,10 @@ Swarmnet::Swarmnet() {
 Swarmnet::~Swarmnet() {
 }
 
+void Swarmnet::set_common_sys(Common_system * common_sys) {
+    this->common_sys = common_sys;
+}
+
 Channel * Swarmnet::new_channel(int type, int hops, bool listen) {
     if(type > CHAN_TYPE_MAX) {
         // type invalid
@@ -22,6 +26,7 @@ Channel * Swarmnet::new_channel(int type, int hops, bool listen) {
     }
     
     chans[chan_num].init(type, hops, listen);
+    chans[chan_num].set_common_sys(common_sys);
     chan_num++;
     return &(chans[chan_num-1]);
 }
