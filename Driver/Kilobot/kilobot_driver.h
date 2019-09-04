@@ -14,6 +14,8 @@ extern "C" {
                              kilo_message_tx = message_tx; \
                              kilo_message_tx_success = message_tx_success;\
                              kilo_message_rx = message_rx; \
+                             swarmos.set_common_sys_get_clock(get_clock); \
+                             swarmnet = swarmos.get_swarmnet(); \
                              kilo_start(setup, loop); \
                              return 0; \
                          }
@@ -21,7 +23,7 @@ extern "C" {
 
 message_t message;
 SwarmOS swarmos;
-Swarmnet * swarmnet = swarmos.get_swarmnet();
+Swarmnet * swarmnet;
 void message_tx_success() { }
 
 message_t *message_tx() {
@@ -39,4 +41,8 @@ void message_rx(message_t *message, distance_measurement_t *distance_measurement
     Meta_t meta;
     meta.dist = dist;
     swarmnet->receive(message->data, PKT_SIZE, &meta);
+}
+
+unsigned int get_clock() {
+    return (unsigned int) kilo_ticks;
 }
