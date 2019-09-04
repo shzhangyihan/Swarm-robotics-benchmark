@@ -25,6 +25,10 @@ void Channel::init(int type, int hops, bool time_chan) {
 Channel::~Channel() {
 }
 
+void Channel::set_common_sys(Common_system * common_sys) {
+    this->common_sys = common_sys;
+}
+
 #if FUNC
 Subscriber * Channel::new_subscriber(int dist, std::function<void(unsigned char *, int, int, Meta_t *)> callback) {
 #else
@@ -76,7 +80,7 @@ int Channel::send(unsigned char * msg, int msgSize) {
     int msgId = rand() % MAX_MSG_ID;
     int payloadSize;
     int header_byte = HEADER_BYTE;
-    unsigned int cur_time = get_clock();
+    unsigned int cur_time = common_sys->get_clock();
     if(time_chan) {
         header_byte = header_byte + TIMER_BYTE;
     }
@@ -136,7 +140,7 @@ int Channel::next_pkt(Packet *ret) {
                 publishers[i].sent_callback();
     }
     if(time_chan) {
-        unsigned int cur_time = get_clock();
+        unsigned int cur_time = common_sys->get_clock();
         unsigned int old_time = ret->get_time_bytes();
         unsigned int diff_time = common::clock_diff(old_time, cur_time);
         ret->set_time_bytes(diff_time);
@@ -180,7 +184,7 @@ void Channel::receive(Packet * newPkt, Meta_t * meta) {
     memcpy(recvBuffer + recv_pktNum, newPkt, sizeof(Packet));
     // update timer if needed
     if(time_chan) {
-        unsigned int cur_time = get_clock();
+        unsigned int cur_time = common_sys->get_clock();
         unsigned int prev_time = recvBuffer[recv_pktNum].get_time_bytes();
         unsigned int diff_time = 0;
         if(cur_time < prev_time) {
@@ -228,7 +232,7 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
     SWARM_LOG("Final pkt at %d; if_end? %d", final_pkt, recvBuffer[assembler[final_pkt]].get_if_end());
     
     unsigned int longest_diff_time = 0;
-    unsigned int cur_time = get_clock();
+    unsigned int cur_time = common_sys->get_clock();
     // if all continuous and is finished, then merge
     if(final_pkt != -1 && recvBuffer[assembler[final_pkt]].get_if_end()) {
         SWARM_LOG("!!! Start merging msg !!!");
@@ -257,6 +261,10 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
         */
         if(time_chan) {
             SWARM_LOG("Timer channel msg formed, time diff = %d", longest_diff_time);
+            meta->msg_delay = longest_diff_time;
+        }
+        else {
+            meta->msg_delay = 0;
         }
         overflowCounter = 0;
         overflowFlag = false;
