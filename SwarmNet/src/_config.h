@@ -3,7 +3,7 @@
 /* call back meta data struct */
 typedef struct Meta {
 	int dist;
-	float theta;
+	int msg_delay;
 } Meta_t;
 
 /* functional parameter */

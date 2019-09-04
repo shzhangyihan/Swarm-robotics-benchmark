@@ -16,7 +16,7 @@
 //#define HEADER_BYTE 3
 //#define MAX_TYPE    8
 
-class Swarmnet: Base {
+class Swarmnet {
     public:
         /* ---- user interfaces ---- */
 
@@ -31,8 +31,10 @@ class Swarmnet: Base {
 
         Swarmnet();
         ~Swarmnet();
+        void set_common_sys(Common_system * common_sys);
 
     private:
+        Common_system * common_sys;
         int nodeId;
         int forward_size;
         Packet forwardBuffer[FORWARD_BUFF_SIZE];

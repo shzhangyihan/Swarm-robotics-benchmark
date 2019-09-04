@@ -17,11 +17,11 @@ extern "C" {
                              kilo_start(setup, loop); \
                              return 0; \
                          }
+#define rand rand_hard
 
 message_t message;
 SwarmOS swarmos;
 Swarmnet * swarmnet = swarmos.get_swarmnet();
-
 void message_tx_success() { }
 
 message_t *message_tx() {

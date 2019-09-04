@@ -3,10 +3,11 @@
 /* call back meta data struct */
 typedef struct Meta {
 	int dist;
+	int msg_delay;
 } Meta_t;
 
 /* functional parameter */
-#define DEBUG true
+#define DEBUG false
 #define FUNC true
 #define CLASS mykilobot
 

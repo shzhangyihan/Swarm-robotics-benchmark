@@ -40,8 +40,13 @@ class kilobot_driver : public kilobot {
             meta.dist = dist;
             swarmnet->receive(message->data, PKT_SIZE, &meta);
         }
+        
+        unsigned int get_clock() {
+            return (unsigned int) kilo_ticks;
+        }
 
         kilobot_driver() {
+            swarmos.set_common_sys_get_clock(std::bind(&kilobot_driver::get_clock, this));
             swarmnet = swarmos.get_swarmnet();
         }
 };

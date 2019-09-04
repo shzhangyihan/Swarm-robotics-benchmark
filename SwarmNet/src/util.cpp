@@ -64,8 +64,8 @@ void common::dummy_lock() {}
 
 unsigned int common::dummy_clock() { return 0; }
 
-void (*Base::lock)() = common::dummy_lock;
-
-void (*Base::unlock)() = common::dummy_lock;
-
-unsigned int (*Base::get_clock)() = common::dummy_clock;
+Common_system::Common_system() {
+    lock = common::dummy_lock;
+    unlock = common::dummy_lock;
+    get_clock = common::dummy_clock;
+}
