@@ -28,3 +28,9 @@
 #define BUFF_MEM_USAGE   ((BUFF_SIZE_PER_CHAN * TOTAL_CHAN_NUM + FORWARD_BUFF_SIZE * PKT) * PKT_MEM_USAGE)
 #define CACHE_MEM_USAGE  (CACHE_SIZE * HEADER_BYTE)
 #define TOTAL_MEM_USAGE  (BUFF_MEM_USAGE + CACHE_MEM_USAGE)
+
+#if DEBUG
+#define SWARM_LOG(...) printf("(%s) ", __func__); printf(__VA_ARGS__); printf("\r\n");
+#else
+#define SWARM_LOG(...)
+#endif

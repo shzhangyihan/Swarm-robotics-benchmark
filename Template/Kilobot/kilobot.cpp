@@ -13,7 +13,7 @@ void sent() {
 }
 
 void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
-    printf("M Recv dist = %d, theta = %f\n", meta->dist);
+    printf("M Recv dist = %d\n", meta->dist);
 } 
 
 void loop() {
