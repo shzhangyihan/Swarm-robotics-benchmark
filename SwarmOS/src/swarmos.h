@@ -9,6 +9,11 @@ class SwarmOS {
     public:
         Swarmnet * get_swarmnet();
 
+        unsigned int get_clock();
+        unsigned int random_func();
+        void lock();
+        void unlock();
+        
         #if FUNC
         void set_common_sys_get_clock(std::function<unsigned int()> get_clock);
         void set_common_sys_random_func(std::function<unsigned int()> random_func);

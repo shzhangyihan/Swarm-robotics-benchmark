@@ -9,6 +9,22 @@ SwarmOS::SwarmOS() {}
 
 SwarmOS::~SwarmOS() {}
 
+unsigned int SwarmOS::get_clock() {
+    return common_sys.get_clock();
+}
+
+unsigned int SwarmOS::random_func() {
+    return common_sys.random_func();
+}
+
+void SwarmOS::lock() {
+    common_sys.lock();
+}
+
+void SwarmOS::unlock() {
+    common_sys.unlock();
+}
+
 #if FUNC
 void SwarmOS::set_common_sys_get_clock(std::function<unsigned int()> get_clock) {
     common_sys.get_clock = get_clock;

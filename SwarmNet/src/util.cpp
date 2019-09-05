@@ -1,5 +1,5 @@
 #include "util.h"
-#include "math.h"
+#include <stdlib.h>
 #include "stdio.h"
 
 unsigned int common::decode(unsigned char * header, unsigned int offset, unsigned int len) {
