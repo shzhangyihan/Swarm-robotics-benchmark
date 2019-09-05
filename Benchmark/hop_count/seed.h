@@ -5,39 +5,20 @@ START_USER_PROGRAM
 
 Channel *channel;
 Publisher *publisher;
-Subscriber *subscriber; 
-unsigned char msg1[10];
-
-int minhop1 = -1;
-int minhop2 = -1;
+unsigned char message[1];
 
 void sent() {
-    publisher->send(msg1, strlen((char*)msg1));
+    publisher->send(message, strlen((char*)message));
 }
 
-void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
-    if (msg[0] == 'A'){
-        if (hop > minhop1){
-            minhop1 = hop;
-        }  
-    }
-    if (msg[0] == 'B'){
-        if (hop > minhop2){
-            minhop2 = hop;
-        }  
-    }
-} 
-
 void loop() {
-
 }
 
 void setup() {
-    strcpy((char*)msg1, "H");
+    message[0] = 0;
     channel = swarmnet->new_channel(2, 4, false);
     publisher = channel->new_publisher(sent);
-    subscriber = channel->new_subscriber(100, call_back);
-    publisher->send(msg1, strlen((char*)msg1));
+    publisher->send(message, 1);
     set_color(RGB(0,0,1));
 }
 

@@ -3,8 +3,9 @@
 #include "../../SwarmOS/src/swarmos.h"
 #include "std_macro.h"
 
-#define START_USER_PROGRAM class mykilobot : public kilobot_driver {
+#define START_USER_PROGRAM class CLASS : public kilobot_driver {
 #define END_USER_PROGRAM   };
+//#define CLASS mykilobot
 
 /*----------------------------------------------------------------------*/
 /*-----------------------------             ----------------------------*/
