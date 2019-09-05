@@ -13,6 +13,7 @@ namespace common {
     
     void dummy_lock();
     unsigned int dummy_clock();
+    unsigned int dummy_rand_func();
 }
 
 class Common_system {
@@ -22,9 +23,11 @@ class Common_system {
         std::function<unsigned int()> get_clock;
         std::function<void()> lock;
         std::function<void()> unlock;
+        std::function<unsigned int()> random_func;
         #else
         void(*lock)();
         void(*unlock)();
         unsigned int(*get_clock)();
+        unsigned int(*random_func)();
         #endif
 };

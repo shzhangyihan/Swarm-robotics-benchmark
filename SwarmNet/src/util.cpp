@@ -1,4 +1,6 @@
 #include "util.h"
+#include "math.h"
+#include "stdio.h"
 
 unsigned int common::decode(unsigned char * header, unsigned int offset, unsigned int len) {
     unsigned int ret = 0;
@@ -64,8 +66,11 @@ void common::dummy_lock() {}
 
 unsigned int common::dummy_clock() { return 0; }
 
+unsigned int common::dummy_rand_func() { return rand(); }
+
 Common_system::Common_system() {
     lock = common::dummy_lock;
     unlock = common::dummy_lock;
     get_clock = common::dummy_clock;
+    random_func = common::dummy_rand_func;
 }

@@ -28,7 +28,9 @@ class kilobot_driver : public kilobot {
             message.crc = message_crc(&message);
             if(ret == 0) return NULL;
             static int r = rand() % 100;
-            if(r <= 90) return &message;
+            if(r <= 90) {
+                return &message;
+            }
             return NULL;
         }
         
@@ -45,8 +47,13 @@ class kilobot_driver : public kilobot {
             return (unsigned int) kilo_ticks;
         }
 
+        unsigned int custom_rand() {
+            return rand();
+        }
+
         kilobot_driver() {
             swarmos.set_common_sys_get_clock(std::bind(&kilobot_driver::get_clock, this));
+            swarmos.set_common_sys_random_func(std::bind(&kilobot_driver::custom_rand, this));
             swarmnet = swarmos.get_swarmnet();
         }
 };

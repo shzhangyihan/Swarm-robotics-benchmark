@@ -1,7 +1,7 @@
 #include "swarmnet.h"
 
 Swarmnet::Swarmnet() {
-    new_id();
+    //new_id();
     roundRobinIndex = 0;
     chan_num = 0;
     forward_size = 0;
@@ -12,6 +12,7 @@ Swarmnet::~Swarmnet() {
 
 void Swarmnet::set_common_sys(Common_system * common_sys) {
     this->common_sys = common_sys;
+    new_id();
 }
 
 Channel * Swarmnet::new_channel(int type, int hops, bool listen) {
@@ -32,7 +33,7 @@ Channel * Swarmnet::new_channel(int type, int hops, bool listen) {
 }
 
 void Swarmnet::new_id() {
-    this->nodeId = rand() % NODE_ID_MAX;
+    this->nodeId = common_sys->random_func() % NODE_ID_MAX;
 }
 
 int Swarmnet::next_pkt(unsigned char * pkt) {
