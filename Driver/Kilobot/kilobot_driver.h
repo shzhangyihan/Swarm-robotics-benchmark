@@ -6,6 +6,7 @@ extern "C" {
     #include "../../../Swarm-platforms/kilobot/debug.h"
 }
 #include "../../SwarmOS/src/swarmos.h"
+#include "control_driver.h"
 
 #define START_USER_PROGRAM
 #define END_USER_PROGRAM int main() { \
@@ -15,8 +16,12 @@ extern "C" {
                              kilo_message_tx_success = message_tx_success;\
                              kilo_message_rx = message_rx; \
                              swarmos.set_common_sys_get_clock(get_clock); \
+                             swarmos.register_user_loop(loop); \
+                             swarmos.register_control_factory(&my_control_factory); \
+                             motor_control = (Motor_control_unit *) my_control_factory.get_control_unit(0); \
+                             LED_control = (LED_control_unit *) my_control_factory.get_control_unit(1); \
                              swarmnet = swarmos.get_swarmnet(); \
-                             kilo_start(setup, loop); \
+                             kilo_start(setup, driver_loop); \
                              return 0; \
                          }
 #define rand rand_hard
@@ -24,7 +29,14 @@ extern "C" {
 message_t message;
 SwarmOS swarmos;
 Swarmnet * swarmnet;
+Motor_control_unit * motor_control;
+LED_control_unit * LED_control;
+My_control_factory my_control_factory;
 void message_tx_success() { }
+
+void driver_loop() {
+    swarmos.execute_loop();
+}
 
 message_t *message_tx() {
     message.type = NORMAL;

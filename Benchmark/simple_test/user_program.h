@@ -5,10 +5,8 @@ Publisher *publisher;
 Subscriber *subscriber; 
 unsigned char token[20];
 int rand_id;
-int flag;
 
 void sent() {
-    publisher->send(token, strlen((char*)token));
 }
 
 void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
@@ -16,11 +14,7 @@ void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
 } 
 
 void loop() {
-    //if(flag = 0) {
-    int ret = publisher->send(token, strlen((char*)token));
-    //flag = 1;}
-    //printf("%d\n", ret);
-    //printf("kilo_ticks = %d\n", kilo_ticks);
+    publisher->send(token, strlen((char*)token));
 }
 
 void setup() {
@@ -30,8 +24,6 @@ void setup() {
     channel = swarmnet->new_channel(2, 0, true);
     publisher = channel->new_publisher(sent);
     subscriber = channel->new_subscriber(100, call_back);
-    //publisher->send(token, strlen((char*)token));
-    flag = 0;
     set_color(RGB(1, 0, 0));
 }
 
