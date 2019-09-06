@@ -32,7 +32,6 @@ void loop() {
 }
 
 void setup() {
-    printf("setup\n");
     motor_state = 0;
     motor_control->move_forward(1000);
 
