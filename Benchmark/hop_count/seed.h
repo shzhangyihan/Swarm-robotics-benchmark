@@ -12,14 +12,16 @@ void sent() {
 }
 
 void loop() {
+	//printf("%d\r\n", id);
 }
 
 void setup() {
     message[0] = 0;
-    channel = swarmnet->new_channel(2, 4, false);
+    channel = swarmnet->new_channel(id % 4, 4, false);
     publisher = channel->new_publisher(sent);
     publisher->send(message, 1);
-    set_color(RGB(0,0,1));
+    set_color(RGB(1,1,1));
+    loop();
 }
 
 END_USER_PROGRAM
