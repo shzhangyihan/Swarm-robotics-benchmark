@@ -81,7 +81,7 @@ void setup() {
     publisher = channel->new_publisher(sent);
     subscriber = channel->new_subscriber(100, call_back);
     publisher->send(msg1, strlen((char*)msg1));
-    set_color(RGB(0,0,0));
+    set_color(RGB(0,0,1));
 }
 
 END_USER_PROGRAM

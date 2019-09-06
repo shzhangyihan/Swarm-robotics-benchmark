@@ -74,10 +74,11 @@ void Channel::print_channel_status() {
 int Channel::send(unsigned char * msg, int msgSize) {
     if(!this->ready) {
         // buffer not ready to send
+        SWARM_LOG("Send failed, due to channel not ready");
         return ERROR_NOT_READY;
     }
     
-    int msgId = rand() % MAX_MSG_ID;
+    int msgId = common_sys->random_func() % MAX_MSG_ID;
     int payloadSize;
     int header_byte = HEADER_BYTE;
     unsigned int cur_time = common_sys->get_clock();
@@ -95,6 +96,7 @@ int Channel::send(unsigned char * msg, int msgSize) {
     int totalPkt = (msgSize + payloadSize - 1) / payloadSize;
     if(totalPkt > MAX_BUFF) {
         // msg too long
+        SWARM_LOG("Send failed, due to message too long");
         return ERROR_TOO_LONG;
     }
     
@@ -113,6 +115,7 @@ int Channel::send(unsigned char * msg, int msgSize) {
             sendBuffer[i].set_time_bytes(cur_time);
         }
     }
+    SWARM_LOG("Set ready to false");
     this->ready = false;
     this->send_pktNum = totalPkt;
     this->send_index = 0;
@@ -133,6 +136,7 @@ int Channel::next_pkt(Packet *ret) {
         // finish sending the entire msg
         send_index = 0;
         send_pktNum = 0;
+        SWARM_LOG("Set ready to true");
         ready = true;
         // callback on all sents
         for(int i = 0; i < MAX_PUB_PER_CHAN; i++)
@@ -154,7 +158,7 @@ void Channel::receive(Packet * newPkt, Meta_t * meta) {
     int msgId  = newPkt->get_msg_id();
     int seqNum = newPkt->get_seq_num();
     int ttl    = newPkt->get_ttl();
-    
+    SWARM_LOG("Received message with node_id %d msg_id %d seq_num %d", nodeId, msgId, seqNum);
     for(int i = recv_pktNum - 1; i > 0; i--) {
         if(recvBuffer[i].get_node_id() == nodeId &&
            recvBuffer[i].get_msg_id()  == msgId  &&
@@ -212,6 +216,7 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
         assembler[i] = -1;
     
     for(int i = 0; i < recv_pktNum; i++) {
+        SWARM_LOG("Inspecting packet node_id %d msg_id %d seq_num %d if_end %d", recvBuffer[i].get_node_id() ,recvBuffer[i].get_msg_id(), recvBuffer[i].get_seq_num(), recvBuffer[i].get_if_end())
         if(recvBuffer[i].get_node_id() == nodeId &&
            recvBuffer[i].get_msg_id()  == msgId  &&
            recvBuffer[i].get_ttl()     == ttl) {
