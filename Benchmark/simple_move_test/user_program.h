@@ -1,35 +1,43 @@
 START_USER_PROGRAM
 
-int previous_time;
-int current_time;
-int state;
+int motor_state;
+int LED_state;
 
 void loop() {
-    /*
-    current_time = swarmos.get_clock();
-    printf("current time is %d\n", current_time);
-    if(current_time > previous_time && current_time - previous_time > 200) {
-        if(state == 0) {
-            state = 1;
-            set_color(RGB(0, 1, 0));
-            spinup_motors();
-            set_motors(kilo_straight_left, kilo_straight_right);
+    if(motor_control->current_status() == Stop) {
+        if(motor_state == 0) {
+            motor_control->turn_left(300);
+            motor_state = 1;
+        }
+        else if(motor_state == 1) {
+            motor_control->move_forward(1000);
+            motor_state = 2;
+        }
+        else if(motor_state == 2) {
+            motor_control->turn_right(300);
+            motor_state = 0;
+        }
+    }
+
+    if(LED_control->current_status() == Off) {
+        if(LED_state == 0) {
+            LED_control->turn_on(0, 1, 0, 200);
+            LED_state = 1;
         }
         else {
-            state = 0;
-            set_color(RGB(0, 0, 1));
-            set_motors(0, 0);
+            LED_control->turn_on(0, 0, 1, 200);
+            LED_state = 0;
         }
-        previous_time = current_time;
     }
-    */
 }
 
 void setup() {
-    //state = 0;
-    //previous_time = swarmos.get_clock();
-    set_color(RGB(1, 0, 0));
-    motor_control->move_forward(300);
+    printf("setup\n");
+    motor_state = 0;
+    motor_control->move_forward(1000);
+
+    LED_state = 0;
+    LED_control->turn_on(1, 0, 0, 200);
 }
 
 END_USER_PROGRAM

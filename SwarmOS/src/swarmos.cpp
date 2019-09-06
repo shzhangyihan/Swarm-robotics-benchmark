@@ -6,6 +6,7 @@ Swarmnet * SwarmOS::get_swarmnet() {
 }
 
 SwarmOS::SwarmOS() {
+    this->control_factory = NULL;
     this->user_loop = NULL;
 }
 
@@ -28,6 +29,7 @@ void SwarmOS::unlock() {
 }
 
 void SwarmOS::execute_loop() {
+    if(control_factory == NULL) return;
     control_factory->update_control();
     if(this->user_loop == NULL) {
     }

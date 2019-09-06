@@ -6,7 +6,6 @@
 
 #define START_USER_PROGRAM class CLASS : public kilobot_driver {
 #define END_USER_PROGRAM   };
-//#define CLASS mykilobot
 
 /*----------------------------------------------------------------------*/
 /*-----------------------------             ----------------------------*/
@@ -20,6 +19,7 @@ class kilobot_driver : public kilobot {
         SwarmOS swarmos;
         Swarmnet * swarmnet;
         Motor_control_unit * motor_control;
+        LED_control_unit * LED_control;
         My_control_factory my_control_factory;
 
         //executed on successfull message send
@@ -65,8 +65,10 @@ class kilobot_driver : public kilobot {
             swarmos.set_common_sys_get_clock(std::bind(&kilobot_driver::get_clock, this));
             swarmos.set_common_sys_random_func(std::bind(&kilobot_driver::custom_rand, this));
             swarmos.register_user_loop(std::bind(&kilobot_driver::loop, this));
+            my_control_factory.register_this(this);
             swarmos.register_control_factory(&my_control_factory);
-            motor_control = (Motor_control_unit *) my_control_factory.get_control_unit(1);
+            motor_control = (Motor_control_unit *) my_control_factory.get_control_unit(0);
+            LED_control = (LED_control_unit *) my_control_factory.get_control_unit(1);
             swarmnet = swarmos.get_swarmnet();
         }
 };

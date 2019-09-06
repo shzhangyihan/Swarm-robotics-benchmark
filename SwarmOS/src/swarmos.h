@@ -32,9 +32,9 @@ class SwarmOS {
 
         SwarmOS();
         ~SwarmOS();
-    
-    private:
         Common_system common_sys;
+
+    private:
         Control_factory * control_factory;
         Swarmnet swarmnet;
         #if FUNC
