@@ -146,7 +146,7 @@ void python_register_set_motors(set_motors_caller caller, void *usr_f) {
 
 void python_call_driver_loop() { driver_loop(); }
 
-void python_call_driver_setup() { driver_loop(); }
+void python_call_driver_setup() { driver_setup(); }
 
 unsigned int python_get_clock() {
     return (unsigned int)my_get_clock_caller(get_clock_caller_func);
@@ -160,7 +160,10 @@ void python_set_motors(int left, int right) {
     my_set_motors_caller(set_motors_caller_func, left, right);
 }
 
-int python_pull_packet(unsigned char *packet) { return pull_packet(packet); }
+int python_pull_packet(unsigned char *packet) {
+    int size = pull_packet(packet);
+    return size;
+}
 
 void python_packet_receive(unsigned char *packet_received, float distance) {
     packet_receive(packet_received, distance);

@@ -36,6 +36,7 @@ def call_driver_loop():
     python_call_driver_loop()
 
 def call_driver_setup():
+    print "python driver setup"
     python_call_driver_setup()
 
 def pull_packet(pkt):
