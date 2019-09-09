@@ -1,45 +1,30 @@
 #pragma once
 
-#define PY_SSIZE_T_CLEAN
-#ifdef __APPLE__
-#include <Python/Python.h>
-#elif __linux__
-#include <Python.h>
-#endif
-#include <iostream>
+// python callback for get_clock
+typedef int (*get_clock_caller)(void *user_func);
+get_clock_caller my_get_clock_caller;
+void * get_clock_caller_func;
 
-PyObject * sys, * path, * ModuleString, * Module, * Dict;
-PyObject * Coach_start_func, * Clock_func, * Set_motor_func, * Set_LED_func;
+// python callback for set_color
+typedef void (*set_color_caller)(void *user_func, int red, int green, int blue);
+set_color_caller my_set_color_caller;
+void * set_color_caller_func;
 
-void coach_start() {
-    Py_Initialize();
-    sys = PyImport_ImportModule("sys");
-    path = PyObject_GetAttrString(sys, "path");
-    PyList_Append(path, PyString_FromString("../../Driver/Coachbot/"));
-    ModuleString = PyString_FromString((char*) "coach_kernel_dummy");
-    printf("ha?\n");
+// python callback for set_motors
+typedef void (*set_motors_caller)(void *user_func, int left, int right);
+set_motors_caller my_set_motors_caller;
+void * set_motors_caller_func;
 
-    Module = PyImport_Import(ModuleString);
-    Dict = PyModule_GetDict(Module);
-    printf("ha?\n");
+void python_register_get_clock(get_clock_caller caller, void * usr_f);
+void python_register_set_color(set_color_caller caller, void * usr_f);
+void python_register_set_motors(set_motors_caller caller, void * usr_f);
 
-    Coach_start_func = PyDict_GetItemString(Dict, "coach_start");
-    Clock_func = PyDict_GetItemString(Dict, "clock");
-    Set_motor_func = PyDict_GetItemString(Dict, "set_motor");
-    Set_LED_func = PyDict_GetItemString(Dict, "set_LED");
-    printf("ho?\n");
-    PyObject_CallObject(Coach_start_func, NULL);
-}
+void python_call_driver_loop();
+void python_call_driver_setup();
 
-unsigned int python_get_clock() {
-    PyObject * Result = PyObject_CallObject(Clock_func, NULL);
-    return (unsigned int) PyInt_AsLong(Result);
-}
+int python_pull_packet(unsigned char * packet);
+void python_packet_receive(unsigned char *packet_received, float distance);
 
-void python_set_color(int red, int green, int blue) {
-
-}
-
-void python_set_motors(int left, int right) {
-
-}
+unsigned int python_get_clock();
+void python_set_color(int red, int green, int blue);
+void python_set_motors(int left, int right);

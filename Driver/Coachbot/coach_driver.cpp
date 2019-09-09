@@ -1,19 +1,33 @@
 #pragma once
 
 #include "coach_driver.h"
+#include "python_driver.h"
 
-#define PY_SSIZE_T_CLEAN
-#ifdef __APPLE__
-#include <Python/Python.h>
-#elif __linux__
-#include <Python.h>
-#endif
+int driver_setup() {
+    swarmos.set_common_sys_get_clock(get_clock);
+    swarmos.register_user_loop(loop);
+    swarmos.register_control_factory(&my_control_factory);
+    motor_control = (Motor_control_unit *)my_control_factory.get_control_unit(0);
+    LED_control = (LED_control_unit *)my_control_factory.get_control_unit(1);
+    swarmnet = swarmos.get_swarmnet();
+    setup();
+    return 0;
+}
 
-#include <stdio.h>
+unsigned int get_clock() {
+    return python_get_clock();
+}
 
-extern "C" {
-    int call_cpp_loop() {
-        printf("Hey I am in c calling loop!\n");
-        driver_loop();
-    }
+void driver_loop() {
+    swarmos.execute_loop();
+}
+
+int pull_packet(unsigned char * packet) {
+    return swarmnet->next_pkt(packet);
+}
+
+void packet_receive(unsigned char *packet_received, float distance) {
+    Meta_t meta;
+    meta.dist = distance;
+    swarmnet->receive(packet_received, PKT_SIZE, &meta);
 }
