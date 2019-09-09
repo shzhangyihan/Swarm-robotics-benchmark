@@ -8,7 +8,7 @@ cdef void cython_set_color_caller(void *user_func, int red, int green, int blue)
 cdef void cython_set_motors_caller(void *user_func, int left, int right):
     (<object>user_func)(left, right)
 
-cdef extern from "../../Driver/Coachbot/python_driver.h":
+cdef extern from "../../Driver/Coachbot/coach_driver.h":
     ctypedef int (*get_clock_caller)(void *user_func)
     ctypedef void (*set_color_caller)(void *user_func, int red, int green, int blue)
     ctypedef void (*set_motors_caller)(void *user_func, int left, int right)

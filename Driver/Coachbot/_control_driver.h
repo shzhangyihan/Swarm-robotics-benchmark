@@ -1,6 +1,5 @@
 #pragma once
 #include "../../SwarmOS/src/swarmos.h"
-#include "python_driver.h"
 
 #define NUM_OF_CONTROL_UNITS 2
 

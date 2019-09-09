@@ -16,8 +16,8 @@ swarmnet_source_files = [swarmnet_dir + "channel.cpp",
                          swarmnet_dir + "swarmnet.cpp",
                          swarmnet_dir + "util.cpp"]
 swarmos_source_files = [swarmos_dir + "swarmos.cpp"]
-driver_source_files = [driver_dir + "coach_driver.cpp", driver_dir + "python_driver.cpp"]
-#driver_source_files = []
+#driver_source_files = [driver_dir + "coach_driver.cpp"]
+driver_source_files = []
 source_files = pyx_source_files + swarmnet_source_files + swarmos_source_files + driver_source_files
 
 setup(ext_modules = [
