@@ -3,52 +3,74 @@
 
 START_USER_PROGRAM
 
-Channel *channel;
-Publisher *publisher;
-Subscriber *subscriber;
-Channel *channel2;
-Publisher *publisher2;
-Subscriber *subscriber2;
-unsigned char message[1];
-int hop1;
-int hop2;
+#define MAX_HOP 100
+#define LED_DURATION 200
 
-void sent() {
-    publisher->send(message, strlen((char*)message));
-}
-void sent2() {
-    publisher2->send(message, strlen((char*)message));
+typedef struct custom_message {
+   int hop;
+} custom_message_t;
+
+Channel * channel_seed_1;
+Channel * channel_seed_2;
+
+Publisher * publisher_channel_1;
+Publisher * publisher_channel_2;
+
+Subscriber * subscriber_channel_1;
+Subscriber * subscriber_channel_2;
+
+custom_message_t my_message_channel_1;
+custom_message_t my_message_channel_2;
+
+int hop_from_seed_1;
+int hop_from_seed_2;
+
+void sent_callback_channel_1() {
+    publisher_channel_1->send((unsigned char *) &my_message_channel_1, sizeof(my_message_channel_1));
 }
 
-void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
-	if (hop < hop1) hop1 = hop;
+void sent_callback_channel_2() {
+    publisher_channel_2->send((unsigned char *) &my_message_channel_2, sizeof(my_message_channel_2));
 }
-void call_back2(unsigned char * msg, int size, int hop, Meta_t * meta) {
-	if (hop < hop2) hop2 = hop;
+
+void recv_callback_channel_1(unsigned char * msg, int size, int ttl, Meta_t * meta) {
+	custom_message_t * received_msg = (custom_message_t *) msg;
+    if(received_msg->hop < hop_from_seed_1) {
+        hop_from_seed_1 = received_msg->hop;
+    }
+}
+
+void recv_callback_channel_2(unsigned char * msg, int size, int ttl, Meta_t * meta) {
+	custom_message_t * received_msg = (custom_message_t *) msg;
+    if(received_msg->hop < hop_from_seed_2) {
+        hop_from_seed_2 = received_msg->hop;
+    }
 }
 
 void loop() {
-	if (hop1 == 0) set_color(RGB(1,0,0));
-	else if (hop1 == 1) set_color(RGB(1,1,0));
-	else if (hop1 == 2) set_color(RGB(1,0,1));
-	else if (hop1 == 3) set_color(RGB(0,1,1));
-	else if (hop1 == 4) set_color(RGB(0,0,1));
+    LED_control->turn_on(hop_from_seed_1, hop_from_seed_2, 0, LED_DURATION);
 }
 
 void setup() {
-    message[0] = 0;
-    channel = swarmnet->new_channel(0, 4, false);
-    publisher = channel->new_publisher(sent);
-    subscriber = channel->new_subscriber(100, call_back);
-    channel2 = swarmnet->new_channel(2, 4, false);
-    publisher2 = channel2->new_publisher(sent2);
-    subscriber2 = channel2->new_subscriber(100, call_back2);
-    publisher->send(message, 1);
-    publisher2->send(message, 1);
-    set_color(RGB(0,0,0));
-    hop1 = 10;
-    hop2 = 20;
-    loop();
+    hop_from_seed_1 = MAX_HOP;
+    hop_from_seed_1 = MAX_HOP;
+
+    my_message_channel_1.hop = hop_from_seed_1;
+    my_message_channel_2.hop = hop_from_seed_2;
+
+    channel_seed_1 = swarmnet->new_channel(1, 0, false);
+    channel_seed_2 = swarmnet->new_channel(2, 0, false);
+
+    publisher_channel_1 = channel_seed_1->new_publisher(sent_callback_channel_1);
+    publisher_channel_2 = channel_seed_2->new_publisher(sent_callback_channel_2);
+
+    subscriber_channel_1 = channel_seed_1->new_subscriber(100, recv_callback_channel_1);
+    subscriber_channel_2 = channel_seed_2->new_subscriber(100, recv_callback_channel_2);
+
+    publisher_channel_1->send((unsigned char *) &my_message_channel_1, sizeof(my_message_channel_1));
+    publisher_channel_2->send((unsigned char *) &my_message_channel_2, sizeof(my_message_channel_2));
+
+    LED_control->turn_on(0, 0, 0, LED_DURATION);
 }
 
 END_USER_PROGRAM
