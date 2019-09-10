@@ -6,7 +6,8 @@ START_USER_PROGRAM
 #define LED_DURATION 200
 
 typedef struct custom_message {
-   int hop;
+    bool is_seed;
+    int hop;
 } custom_message_t;
 
 Channel * channel_seed_1;
@@ -22,6 +23,8 @@ void loop() {
 }
 
 void setup() {
+    my_message.hop = 0;
+    my_message.is_seed = true;
     channel_seed_1 = swarmnet->new_channel(1, 0, false);
     publisher = channel_seed_1->new_publisher(sent);
     publisher->send((unsigned char *) &my_message, sizeof(my_message));
