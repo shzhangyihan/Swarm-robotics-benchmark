@@ -1,31 +1,115 @@
 #pragma once
-#include "../../../Swarm-robotics-benchmark/Driver/Kilobot_simulation/kilobot_driver.h"
 
 START_USER_PROGRAM
 
-Channel *channel;
-Publisher *publisher;
-Subscriber *subscriber;
-unsigned char message[1];
+#define MAX_HOP 100
+#define LED_DURATION 200
+#define POLL_PERIOD 50
 
-void sent() {
-    publisher->send(message, strlen((char*)message));
+typedef struct custom_message {
+    int hop;
+} custom_message_t;
+
+Channel * channel_seed_1;
+Channel * channel_seed_2;
+
+Publisher * publisher_channel_1;
+Publisher * publisher_channel_2;
+
+Subscriber * subscriber_channel_1;
+Subscriber * subscriber_channel_2;
+
+custom_message_t my_message_channel_1;
+custom_message_t my_message_channel_2;
+
+int hop_from_seed_1;
+int hop_from_seed_2;
+
+int period_min_hop_from_seed_1;
+int period_min_hop_from_seed_2;
+int period_start;
+
+int LED_flag;
+
+void sent_callback_channel_1() {
+    // after sending to channel 1 finished, start new send to channel 1
+    publisher_channel_1->send((unsigned char *) &my_message_channel_1, sizeof(my_message_channel_1));
 }
 
-void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
+void sent_callback_channel_2() {
+    // after sending to channel 2 finished, start new send to channel 2
+    publisher_channel_2->send((unsigned char *) &my_message_channel_2, sizeof(my_message_channel_2));
+}
 
+void recv_callback_channel_1(unsigned char * msg, int size, int ttl, Meta_t * meta) {
+    // 
+	custom_message_t * received_msg = (custom_message_t *) msg;
+    printf("recv 1 - hop: %d dist: %d\r\n", received_msg->hop, meta->dist);
+    if(received_msg->hop < period_min_hop_from_seed_1) {
+        period_min_hop_from_seed_1 = received_msg->hop;
+    }
+}
+
+void recv_callback_channel_2(unsigned char * msg, int size, int ttl, Meta_t * meta) {
+	custom_message_t * received_msg = (custom_message_t *) msg;
+    printf("recv 2 - hop: %d dist: %d\r\n", received_msg->hop, meta->dist);
+    if(received_msg->hop < period_min_hop_from_seed_2) {
+        period_min_hop_from_seed_2 = received_msg->hop;
+    }
+}
+
+void update_LED(int hop_1, int hop_2) {
+    int hop = (LED_flag ? hop_1 : hop_2) % 4;
+    LED_control->turn_on(hop % 2, hop / 2, 1, LED_DURATION);
 }
 
 void loop() {
+    if(swarmos.get_clock() - period_start > POLL_PERIOD) {
+        if(period_min_hop_from_seed_1 < MAX_HOP) {
+            hop_from_seed_1 = period_min_hop_from_seed_1 + 1;
+            my_message_channel_1.hop = hop_from_seed_1;
+        }
+        if(period_min_hop_from_seed_2 < MAX_HOP) {
+            hop_from_seed_2 = period_min_hop_from_seed_2 + 1;
+            my_message_channel_2.hop = hop_from_seed_2;
+        }
+    }
+    printf("hop 1: %d hop 2: %d\r\n", hop_from_seed_1, hop_from_seed_2);
+    if(LED_control->current_status() == Off) {
+        update_LED(hop_from_seed_1, hop_from_seed_2);
+        if(LED_flag == 0) {
+            LED_flag = 1;
+        }
+        else {
+            LED_flag = 0;
+        }
+    }
 }
 
 void setup() {
-    message[0] = 0;
-    channel = swarmnet->new_channel(2, 4, false);
-    publisher = channel->new_publisher(sent);
-    subscriber = channel->new_subscriber(100, call_back);
-    publisher->send(message, 1);
-    set_color(RGB(1,0,0));
+    hop_from_seed_1 = MAX_HOP;
+    hop_from_seed_2 = MAX_HOP;
+    period_min_hop_from_seed_1 = MAX_HOP;
+    period_min_hop_from_seed_2 = MAX_HOP;
+    period_start = swarmos.get_clock();
+
+    my_message_channel_1.hop = hop_from_seed_1;
+    my_message_channel_2.hop = hop_from_seed_2;
+
+    channel_seed_1 = swarmnet->new_channel(1, 0, false);
+    channel_seed_2 = swarmnet->new_channel(2, 0, false);
+
+    publisher_channel_1 = channel_seed_1->new_publisher(sent_callback_channel_1);
+    publisher_channel_2 = channel_seed_2->new_publisher(sent_callback_channel_2);
+
+    subscriber_channel_1 = channel_seed_1->new_subscriber(250, recv_callback_channel_1);
+    subscriber_channel_2 = channel_seed_2->new_subscriber(250, recv_callback_channel_2);
+
+    publisher_channel_1->send((unsigned char *) &my_message_channel_1, sizeof(my_message_channel_1));
+    publisher_channel_2->send((unsigned char *) &my_message_channel_2, sizeof(my_message_channel_2));
+
+    LED_control->turn_on(1, 1, 1, LED_DURATION);
+    LED_flag = 0;
 }
 
 END_USER_PROGRAM
