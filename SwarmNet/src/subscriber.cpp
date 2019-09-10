@@ -2,7 +2,7 @@
 
 void Subscriber::receive(unsigned char * msg, int size, int hop, Meta_t * meta) {
     //if(dist < this->dist && this->callback != NULL) {
-    if(this->callback != NULL) {
+    if(this->callback != NULL && meta->dist < this->dist) {
         callback(msg, size, hop, meta);
     }
 }
