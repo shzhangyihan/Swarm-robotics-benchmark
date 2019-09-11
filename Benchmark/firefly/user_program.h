@@ -3,43 +3,50 @@
 
 START_USER_PROGRAM
 
+#define TIMER_DIVISION_CONSTANT 100
+#define TIMER_MAX 500
+
+typedef struct custom_message {
+    bool firing;
+} custom_message_t;
+
 Channel *channel;
 Publisher *publisher;
 Subscriber *subscriber; 
-unsigned char msg1[10];
+custom_message_t my_message;
 
 void sent() {
-    publisher->send(msg1, strlen((char*)msg1));
+    publisher->send((unsigned char *) &my_message, sizeof(my_message));
 }
 
 void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
-    if (msg[0] == 'A'){
-        timer += (timer/100)*(timer/100);
+    custom_message_t * received_msg = (custom_message_t *) msg;
+    if (received_msg->firing == true){
+        timer += (timer/TIMER_DIVISION_CONSTANT) * (timer/TIMER_DIVISION_CONSTANT);
     }
 } 
 
 void loop() {
-    if (timer >= 500){
-        timer = 0;
-        strcpy((char*)msg1, "A");
-    }
-    else if (timer < 25) {
-        set_color(RGB(1,1,1));
-        strcpy((char*)msg1, "H");
-    }
-    else {
-        set_color(RGB(0,0,1));
-        strcpy((char*)msg1, "H");
+    if(LED_control->current_status() == Off) {
+        if (timer >= TIMER_MAX){
+            timer = 0;
+            my_message.firing = true;
+            LED_control->turn_on(1, 1, 1, 25);
+        }
+        else {
+            my_message.firing = false;
+            LED_control->turn_on(0, 0, 1, 1);
+        }
     }
 }
 
 void setup() {
-    strcpy((char*)msg1, "H");
-    channel = swarmnet.new_channel(2, 0, false);
+    my_message.firing = false;
+    channel = swarmnet->new_channel(1, 0, false);
     publisher = channel->new_publisher(sent);
     subscriber = channel->new_subscriber(100, call_back);
-    publisher->send(msg1, strlen((char*)msg1));
-    set_color(RGB(0,0,1));
+    publisher->send((unsigned char *) &my_message, sizeof(my_message));
+    LED_control->turn_on(0, 0, 1, 1);
 }
 
 END_USER_PROGRAM
