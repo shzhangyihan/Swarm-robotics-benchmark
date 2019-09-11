@@ -25,7 +25,7 @@ class Motor_control_unit: public Control_unit {
         void move_forward(unsigned long time) {
             if(this->common_sys->get_clock == NULL) return;
             this->start_time = (this->common_sys)->get_clock();
-            if(this->status == Stop) spinup_motors();
+            if(this->status != Move_forward) spinup_motors();
             this->status = Move_forward;
             this->time_left = time;
             set_motors(kilo_straight_left, kilo_straight_right);
@@ -34,19 +34,19 @@ class Motor_control_unit: public Control_unit {
         void turn_left(unsigned long time) {
             if(this->common_sys->get_clock == NULL) return;
             this->start_time = this->common_sys->get_clock();
-            if(this->status == Stop) spinup_motors();
+            if(this->status != Turn_left) spinup_motors();
             this->status = Turn_left;
             this->time_left = time;
-            set_motors(0, kilo_turn_left);
+            set_motors(kilo_turn_left, 0);
         }
 
         void turn_right(unsigned long time) {
             if(this->common_sys->get_clock == NULL) return;
             this->start_time = this->common_sys->get_clock();
-            if(this->status == Stop) spinup_motors();
+            if(this->status != Turn_right) spinup_motors();
             this->status = Turn_right;
             this->time_left = time;
-            set_motors(kilo_turn_right, 0);
+            set_motors(0, kilo_turn_left);
         }
 
         void stop_motor() {

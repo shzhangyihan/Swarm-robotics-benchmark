@@ -48,7 +48,7 @@ class kilobot_driver : public kilobot {
         }
         
         unsigned int get_clock() {
-            return (unsigned int) kilo_ticks;
+            return (unsigned int) (kilo_ticks/2);
         }
 
         unsigned int custom_rand() {
