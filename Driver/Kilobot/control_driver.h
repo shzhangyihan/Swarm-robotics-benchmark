@@ -37,7 +37,7 @@ class Motor_control_unit: public Control_unit {
             if(this->status == Stop) spinup_motors();
             this->status = Turn_left;
             this->time_left = time;
-            set_motors(kilo_turn_left, 0);
+            set_motors(0, kilo_turn_left);
         }
 
         void turn_right(unsigned long time) {
@@ -46,7 +46,7 @@ class Motor_control_unit: public Control_unit {
             if(this->status == Stop) spinup_motors();
             this->status = Turn_right;
             this->time_left = time;
-            set_motors(0, kilo_turn_right);
+            set_motors(kilo_turn_right, 0);
         }
 
         void stop_motor() {
