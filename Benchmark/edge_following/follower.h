@@ -34,7 +34,7 @@ void sent_callback() {
 }
 
 void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
-	seed_state_t * seed_state = (seed_state_t *) msg;
+    seed_state_t * seed_state = (seed_state_t *) msg;
     if(seed_state->seed_id != my_state.following && meta->dist < my_state.dist) {
         if(seed_state->occupied) {
             motor_control->stop_motor();
@@ -47,7 +47,7 @@ void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
     else if(seed_state->seed_id == my_state.following) {
         my_state.dist = meta->dist;
     }
-    
+
     if(seed_state->seed_id == my_state.following) {
         if(meta->dist > SET_DISTANCE + ALLOW_NOISE) {
             motor_control->turn_right(MOTION_STEP);
