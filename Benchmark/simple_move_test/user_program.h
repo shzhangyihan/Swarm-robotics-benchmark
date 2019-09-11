@@ -6,15 +6,11 @@ int LED_state;
 void loop() {
     if(motor_control->current_status() == Stop) {
         if(motor_state == 0) {
-            motor_control->turn_left(300);
+            motor_control->turn_right(5);
             motor_state = 1;
         }
         else if(motor_state == 1) {
             motor_control->move_forward(1000);
-            motor_state = 2;
-        }
-        else if(motor_state == 2) {
-            motor_control->turn_right(300);
             motor_state = 0;
         }
     }
