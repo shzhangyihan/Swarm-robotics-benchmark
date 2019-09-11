@@ -34,7 +34,7 @@ void sent_callback() {
 }
 
 void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
-	follower_state_t * follower_state = (follower_state_t *) msg;
+    follower_state_t * follower_state = (follower_state_t *) msg;
     if(follower_state->following == my_state.seed_id) {
         my_state.occupied = true;
         last_occupied_time = swarmos.get_clock();
