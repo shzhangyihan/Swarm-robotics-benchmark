@@ -22,14 +22,14 @@ void sent() {
 void call_back(unsigned char * msg, int size, int hop, Meta_t * meta) {
     custom_message_t * received_msg = (custom_message_t *) msg;
     if (received_msg->firing == true){
-        timer += (timer/TIMER_DIVISION_CONSTANT) * (timer/TIMER_DIVISION_CONSTANT);
+        kilo_ticks += (kilo_ticks/TIMER_DIVISION_CONSTANT) * (kilo_ticks/TIMER_DIVISION_CONSTANT);
     }
 } 
 
 void loop() {
     if(LED_control->current_status() == Off) {
-        if (timer >= TIMER_MAX){
-            timer = 0;
+        if (kilo_ticks >= TIMER_MAX){
+            kilo_ticks = 0;
             my_message.firing = true;
             LED_control->turn_on(1, 1, 1, 25);
         }
