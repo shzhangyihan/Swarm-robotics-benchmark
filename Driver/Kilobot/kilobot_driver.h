@@ -16,6 +16,7 @@ extern "C" {
                              kilo_message_tx_success = message_tx_success;\
                              kilo_message_rx = message_rx; \
                              swarmos.set_common_sys_get_clock(get_clock); \
+                             swarmos.set_common_sys_random_func(custom_rand); \
                              swarmos.register_user_loop(loop); \
                              swarmos.register_control_factory(&my_control_factory); \
                              motor_control = (Motor_control_unit *) my_control_factory.get_control_unit(0); \
@@ -24,7 +25,7 @@ extern "C" {
                              kilo_start(setup, driver_loop); \
                              return 0; \
                          }
-#define rand rand_hard
+//#define rand rand_hard
 
 message_t message;
 SwarmOS swarmos;
@@ -57,4 +58,8 @@ void message_rx(message_t *message, distance_measurement_t *distance_measurement
 
 unsigned int get_clock() {
     return (unsigned int) kilo_ticks;
+}
+
+unsigned int custom_rand() {
+    return rand_hard();
 }
