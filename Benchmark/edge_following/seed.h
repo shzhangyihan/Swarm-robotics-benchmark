@@ -5,19 +5,21 @@ START_USER_PROGRAM
 #define SEED_CHANNEL 0
 #define FOLLOWER_CHANNEL 1
 
-#define OCCUPY_TIME_OUT 500
+#define OCCUPY_TIME_OUT 1000
 #define MOTION_DURATION 5
 #define LED_DURATION 20
-#define MAX_DIST 300
+#define MAX_DIST 100
 
 typedef struct seed_state {
     int seed_id;
+    int follower_id;
     bool occupied;
 } seed_state_t;
 
 typedef struct follower_state {
     int follower_id;
     int following;
+    int dist;
 } follower_state_t;
 
 Channel * seed_channel;
@@ -35,16 +37,22 @@ void sent_callback() {
 
 void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
     follower_state_t * follower_state = (follower_state_t *) msg;
-    if(follower_state->following == my_state.seed_id) {
+    if(follower_state->following == my_state.seed_id && my_state.occupied == false) {
         my_state.occupied = true;
+        my_state.follower_id = follower_state->follower_id;
         last_occupied_time = swarmos.get_clock();
     }
-
+    else if(my_state.follower_id == follower_state->follower_id
+            && follower_state->following != my_state.seed_id) {
+        my_state.occupied = false;
+        my_state.follower_id = -1;
+    }
 }
 
 void loop() {
     if(last_occupied_time + OCCUPY_TIME_OUT < swarmos.get_clock()) {
         my_state.occupied = false;
+        my_state.follower_id = -1;
     }
     if(my_state.occupied) {
         LED_control->turn_on(0, 0, 1, LED_DURATION);
@@ -55,8 +63,9 @@ void loop() {
 }
 
 void setup() {
-    my_state.seed_id = swarmos.random_func();
+    my_state.seed_id = swarmos.random_func() % 255;
     my_state.occupied = false;
+    my_state.follower_id = -1;
     last_occupied_time = swarmos.get_clock();
 
     seed_channel = swarmnet->new_channel(SEED_CHANNEL, 0, false);

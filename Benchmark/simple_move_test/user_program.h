@@ -10,8 +10,8 @@ void loop() {
             motor_state = 1;
         }
         else if(motor_state == 1) {
-            motor_control->move_forward(500);
-            LED_control->turn_on(0, 0, 1, 500);
+            motor_control->move_forward(200);
+            LED_control->turn_on(0, 0, 1, 200);
             motor_state = 2;
         }
         else if(motor_state == 2) {
@@ -20,8 +20,8 @@ void loop() {
             motor_state = 3;
         }
         else if(motor_state == 3) {
-            motor_control->move_forward(500);
-            LED_control->turn_on(1, 1, 1, 500);
+            motor_control->move_forward(200);
+            LED_control->turn_on(1, 1, 1, 200);
             motor_state = 0;
         }
     }

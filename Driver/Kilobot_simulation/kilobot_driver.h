@@ -43,12 +43,12 @@ class kilobot_driver : public kilobot {
             int dist = estimate_distance(distance_measurement);
             //printf("P Recv dist = %d, theta = %f\n", dist, t);
             Meta_t meta;
-            meta.dist = dist;
+            meta.dist = dist / 1.4;
             swarmnet->receive(message->data, PKT_SIZE, &meta);
         }
         
         unsigned int get_clock() {
-            return (unsigned int) (kilo_ticks/2);
+            return (unsigned int) (kilo_ticks * 1.8);
         }
 
         unsigned int custom_rand() {
