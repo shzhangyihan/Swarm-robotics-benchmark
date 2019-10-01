@@ -148,6 +148,7 @@ int Channel::next_pkt(Packet *ret) {
         unsigned int old_time = ret->get_time_bytes();
         unsigned int diff_time = common::clock_diff(old_time, cur_time);
         ret->set_time_bytes(diff_time);
+        //printf("send diff time: %u\n", ret->get_time_bytes());
     }
 
     return SUCCESS;
@@ -158,6 +159,7 @@ void Channel::receive(Packet * newPkt, Meta_t * meta) {
     int msgId  = newPkt->get_msg_id();
     int seqNum = newPkt->get_seq_num();
     int ttl    = newPkt->get_ttl();
+    printf("recv diff = %u\n", newPkt->get_time_bytes());
     SWARM_LOG("Received message with node_id %d msg_id %d seq_num %d", nodeId, msgId, seqNum);
     for(int i = recv_pktNum - 1; i > 0; i--) {
         if(recvBuffer[i].get_node_id() == nodeId &&
@@ -199,6 +201,7 @@ void Channel::receive(Packet * newPkt, Meta_t * meta) {
             diff_time = cur_time - prev_time;
         }
         recvBuffer[recv_pktNum].set_time_bytes(diff_time);
+        //printf("recv pkt + diff time: %u, diff time = %u\n", recvBuffer[recv_pktNum].get_time_bytes(), prev_time);
     }
     recv_pktNum++;
     SWARM_LOG("Pkt num after insert: %d", recv_pktNum);
@@ -254,7 +257,11 @@ void Channel::try_merge(int nodeId, int msgId, int ttl, Meta_t * meta) {
                 // measure the time diff from the time bytes
                 unsigned int prev_time = recvBuffer[assembler[i]].get_time_bytes();
                 unsigned int diff_time = common::clock_diff(prev_time, cur_time);
-                if(diff_time > longest_diff_time) longest_diff_time = diff_time;
+                printf("when merge, %u - %u = %u\n", cur_time, prev_time, diff_time);
+                if(diff_time > longest_diff_time) {
+                    printf("new longest diff time: %d\n", diff_time);
+                    longest_diff_time = diff_time;
+                }
             }
         }
 

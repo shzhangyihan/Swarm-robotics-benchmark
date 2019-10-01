@@ -22,7 +22,7 @@ typedef struct Meta {
 #define TIMER_BITS     32
 
 /* local memory bounding */
-#define TOTAL_CHAN_NUM      2
+#define TOTAL_CHAN_NUM      1
 #define BUFF_SIZE_PER_CHAN  20
 #define FORWARD_BUFF_SIZE   10
 #define MAX_SUB_PER_CHAN    1
