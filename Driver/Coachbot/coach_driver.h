@@ -193,7 +193,7 @@ void Motor_control_unit::turn_left(unsigned long time) {
     this->start_time = this->common_sys->get_clock();
     this->status = Turn_left;
     this->time_left = time;
-    python_set_motors(1, 0);
+    python_set_motors(0, 1);
 }
 
 void Motor_control_unit::turn_right(unsigned long time) {
@@ -201,7 +201,7 @@ void Motor_control_unit::turn_right(unsigned long time) {
     this->start_time = this->common_sys->get_clock();
     this->status = Turn_right;
     this->time_left = time;
-    python_set_motors(0, 1);
+    python_set_motors(1, 0);
 }
 
 void Motor_control_unit::stop_motor() {
