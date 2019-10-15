@@ -5,10 +5,10 @@ START_USER_PROGRAM
 #define SEED_CHANNEL 0
 #define FOLLOWER_CHANNEL 1
 
-#define OCCUPY_TIME_OUT 1000
+#define OCCUPY_TIME_OUT 10000
 #define MOTION_DURATION 5
 #define LED_DURATION 20
-#define MAX_DIST 100
+#define MAX_DIST 200
 
 typedef struct seed_state {
     int seed_id;
@@ -42,11 +42,10 @@ void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
         my_state.follower_id = follower_state->follower_id;
         last_occupied_time = swarmos.get_clock();
     }
-    else if(my_state.follower_id == follower_state->follower_id
-            && follower_state->following != my_state.seed_id) {
-        my_state.occupied = false;
-        my_state.follower_id = -1;
-    }
+    else if(follower_state->following == my_state.seed_id 
+            && my_state.follower_id == follower_state->follower_id) {
+        last_occupied_time = swarmos.get_clock();
+    } 
 }
 
 void loop() {
