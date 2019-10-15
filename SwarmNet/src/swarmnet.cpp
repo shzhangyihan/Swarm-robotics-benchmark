@@ -61,20 +61,6 @@ int Swarmnet::next_pkt(unsigned char * pkt) {
             flag = chans[index].next_pkt(&send);
             if(flag == SUCCESS) {
                 send.set_node_id(nodeId);
-                // printf("send time diff = %u\n", send.get_time_bytes());
-                // unsigned char * pkt = send.get_content();
-                // for(int i = 0; i < PKT_SIZE - HEADER_BYTE; i++) {
-                //     unsigned char n = pkt[i];
-                //     for(int j = 0; j < 8; j++) {
-                //         if (n & 1)
-                //             printf("1");
-                //         else
-                //             printf("0");
-                    
-                //         n >>= 1;
-                //     }
-                //     printf("  %c\r\n", n);
-                // }
             }
             else {
                 SWARM_LOG("Channel %d buff empty", chans[index].get_type());
@@ -135,21 +121,6 @@ void Swarmnet::receive(unsigned char * pkt, int size, Meta_t * meta) {
     
     for(int i = 0; i < chan_num; i++) {
         if(chans[i].get_type() == chanNum) {
-            //printf("recv diff = %u\n", newPkt.get_time_bytes());
-            // printf("recv time diff = %u\n", newPkt.get_time_bytes());
-            // unsigned char * pkt = newPkt.get_content();
-            // for(int i = 0; i < PKT_SIZE - HEADER_BYTE; i++) {
-            //     unsigned char n = pkt[i];
-            //     for(int j = 0; j < 8; j++) {
-            //         if (n & 1)
-            //             printf("1");
-            //         else
-            //             printf("0");
-                
-            //         n >>= 1;
-            //     }
-            //     printf("  %c\r\n", n);
-            // }
             chans[i].receive(&newPkt, meta);
         }
     }

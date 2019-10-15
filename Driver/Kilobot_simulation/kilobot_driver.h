@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../src/kilolib.h"
+#include "../../../Swarm-platforms/simulation/src/kilolib.h"
 #include "../../SwarmNet/src/swarmnet.h"
 #include "std_macro.h"
 #include "control_driver.h"
@@ -30,28 +30,10 @@ class kilobot_driver : public kilobot {
             message.type = NORMAL;
             int ret = swarmnet->next_pkt(message.data);
             message.crc = message_crc(&message);
-            if(ret == 0) {
-                return NULL;
-            }
+            if(ret == 0) return NULL;
             static int r = rand() % 100;
             if(r <= 90) {
-                printf("driver send:\n");
-                for(int i = 0; i < ret; i++) {
-                    unsigned char n = message.data[i];
-                    for(int j = 0; j < 8; j++) {
-                        if (n & 1)
-                            printf("1");
-                        else
-                            printf("0");
-                    
-                        n >>= 1;
-                    }
-                    printf("  %c\r\n", n);
-                }
                 return &message;
-            }
-            else {
-                printf("send lost\n");
             }
             return NULL;
         }
@@ -62,19 +44,6 @@ class kilobot_driver : public kilobot {
             //printf("P Recv dist = %d, theta = %f\n", dist, t);
             Meta_t meta;
             meta.dist = dist / 1.4;
-            printf("driver recv:\n");
-            for(int i = 0; i < PKT_SIZE; i++) {
-                unsigned char n = message->data[i];
-                for(int j = 0; j < 8; j++) {
-                    if (n & 1)
-                        printf("1");
-                    else
-                        printf("0");
-                
-                    n >>= 1;
-                }
-                printf("  %c\r\n", n);
-            }
             swarmnet->receive(message->data, PKT_SIZE, &meta);
         }
         
