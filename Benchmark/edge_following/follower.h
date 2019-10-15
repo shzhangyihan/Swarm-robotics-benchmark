@@ -5,9 +5,9 @@ START_USER_PROGRAM
 #define SEED_CHANNEL 0
 #define FOLLOWER_CHANNEL 1
 
-#define MOTION_STEP 12
+#define MOTION_STEP 10
 #define LED_DURATION 200
-#define MAX_DIST 100
+#define MAX_DIST 200
 #define SET_DISTANCE 60
 #define ALLOW_NOISE 5
 
@@ -49,7 +49,7 @@ void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
         my_state.dist = meta->dist;
     }
 
-    if(seed_state->seed_id == my_state.following) {
+    if(seed_state->seed_id == my_state.following && seed_state->follower_id == my_state.follower_id) {
         if(meta->dist > SET_DISTANCE + ALLOW_NOISE) {
             motor_control->turn_right(MOTION_STEP);
             LED_control->turn_on(1, 1, 0, LED_DURATION);
@@ -63,9 +63,15 @@ void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
             LED_control->turn_on(0, 1, 0, LED_DURATION);
         }
     }
+    else if(seed_state->seed_id == my_state.following && seed_state->follower_id != my_state.follower_id) {
+        motor_control->stop_motor();
+    }
 }
 
 void loop() {
+    if(LED_control->current_status() == Off) {
+        LED_control->turn_on(1, 1, 1, LED_DURATION);
+    }
 }
 
 void setup() {
