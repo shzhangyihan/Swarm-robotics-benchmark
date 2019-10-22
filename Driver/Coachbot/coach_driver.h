@@ -69,6 +69,7 @@ My_control_factory my_control_factory;
 
 int driver_setup();
 unsigned int get_clock();
+unsigned int custom_rand();
 void driver_loop();
 int pull_packet(unsigned char * packet);
 void packet_receive(unsigned char *packet_received, float distance);
