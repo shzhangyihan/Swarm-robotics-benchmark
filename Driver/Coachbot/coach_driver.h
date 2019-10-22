@@ -108,6 +108,7 @@ void python_set_motors(int left, int right);
 
 int driver_setup() {
     swarmos.set_common_sys_get_clock(get_clock);
+    swarmos.set_common_sys_random_func(custom_rand);
     swarmos.register_user_loop(loop);
     swarmos.register_control_factory(&my_control_factory);
     motor_control = (Motor_control_unit *)my_control_factory.get_control_unit(0);
@@ -118,6 +119,10 @@ int driver_setup() {
 }
 
 unsigned int get_clock() { return python_get_clock(); }
+
+unsigned int custom_rand() {
+    return rand();
+}
 
 void driver_loop() { swarmos.execute_loop(); }
 
