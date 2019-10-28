@@ -122,6 +122,7 @@ int driver_setup() {
 unsigned int get_clock() { return python_get_clock(); }
 
 unsigned int custom_rand() {
+    srand(time(0));
     return rand();
 }
 
