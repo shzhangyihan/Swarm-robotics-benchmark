@@ -90,12 +90,12 @@ void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
 void loop() {
     if(motor_control->current_status() == Stop) {
         if(motion_state == 1) {
-            motion_state = 3;
+            motion_state = 0;
             motor_control->turn_left(MOTION_STEP);
             LED_control->turn_on(1, 0, 0, LED_DURATION);
         }
         else if(motion_state == 2) {
-            motion_state = 3;
+            motion_state = 0;
             motor_control->turn_right(MOTION_STEP);
             LED_control->turn_on(1, 1, 0, LED_DURATION);
         }
