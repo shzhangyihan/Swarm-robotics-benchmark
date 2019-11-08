@@ -17,7 +17,7 @@ void sent() {
 }
 
 void loop() {
-    LED_control->turn_on(1, 1, 0, LED_DURATION);
+    LED_control->turn_on(1, 1, 1, LED_DURATION);
 }
 
 void setup() {
@@ -25,7 +25,7 @@ void setup() {
     channel_seed_1 = swarmnet->new_channel(1, 0, false);
     publisher = channel_seed_1->new_publisher(sent);
     publisher->send((unsigned char *) &my_message, sizeof(my_message));
-    LED_control->turn_on(1, 1, 0, LED_DURATION);
+    LED_control->turn_on(1, 1, 1, LED_DURATION);
 }
 
 END_USER_PROGRAM

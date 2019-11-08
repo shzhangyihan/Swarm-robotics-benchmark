@@ -5,11 +5,11 @@ START_USER_PROGRAM
 #define SEED_CHANNEL 0
 #define FOLLOWER_CHANNEL 1
 
-#define MOTION_STEP 20
+#define MOTION_STEP 10
 #define LED_DURATION 200
 #define MAX_DIST 200
 #define SET_DISTANCE 60
-#define ALLOW_NOISE 5
+#define ALLOW_NOISE 2
 
 typedef struct seed_state {
     int seed_id;
@@ -89,13 +89,28 @@ void recv_callback(unsigned char * msg, int size, int ttl, Meta_t * meta) {
 
 void loop() {
     if(motor_control->current_status() == Stop) {
+        // if(motion_state == 1) {
+        //     motion_state = 3;
+        //     motor_control->turn_left(MOTION_STEP);
+        //     LED_control->turn_on(1, 0, 0, LED_DURATION);
+        // }
+        // else if(motion_state == 2) {
+        //     motion_state = 3;
+        //     motor_control->turn_right(MOTION_STEP);
+        //     LED_control->turn_on(1, 1, 0, LED_DURATION);
+        // }
+        // else if(motion_state == 3) {
+        //     motion_state = 0;
+        //     motor_control->move_forward(MOTION_STEP);
+        //     LED_control->turn_on(0, 1, 0, LED_DURATION);
+        // }
         if(motion_state == 1) {
-            motion_state = 3;
+            motion_state = 0;
             motor_control->turn_left(MOTION_STEP);
             LED_control->turn_on(1, 0, 0, LED_DURATION);
         }
         else if(motion_state == 2) {
-            motion_state = 3;
+            motion_state = 0;
             motor_control->turn_right(MOTION_STEP);
             LED_control->turn_on(1, 1, 0, LED_DURATION);
         }

@@ -74,16 +74,20 @@ void loop() {
             my_message_channel_2.hop = hop_from_seed_2;
         }
     }
-    printf("hop 1: %d hop 2: %d\r\n", hop_from_seed_1, hop_from_seed_2);
-    if(LED_control->current_status() == Off) {
-        update_LED(hop_from_seed_1, hop_from_seed_2);
-        if(LED_flag == 0) {
-            LED_flag = 1;
-        }
-        else {
-            LED_flag = 0;
-        }
-    }
+    // printf("hop 1: %d hop 2: %d\r\n", hop_from_seed_1, hop_from_seed_2);
+    // if(LED_control->current_status() == Off) {
+    //     update_LED(hop_from_seed_1, hop_from_seed_2);
+    //     if(LED_flag == 0) {
+    //         LED_flag = 1;
+    //     }
+    //     else {
+    //         LED_flag = 0;
+    //     }
+    // }
+    int r = hop_from_seed_1 % 2;
+    int g = hop_from_seed_2 % 2;
+    int b = (r == 0 && g == 0) ? 1: 0;
+    LED_control->turn_on(r * 255, g * 255, b * 255, LED_DURATION);
 }
 
 void setup() {
@@ -102,13 +106,13 @@ void setup() {
     publisher_channel_1 = channel_seed_1->new_publisher(sent_callback_channel_1);
     publisher_channel_2 = channel_seed_2->new_publisher(sent_callback_channel_2);
 
-    subscriber_channel_1 = channel_seed_1->new_subscriber(250, recv_callback_channel_1);
-    subscriber_channel_2 = channel_seed_2->new_subscriber(250, recv_callback_channel_2);
+    subscriber_channel_1 = channel_seed_1->new_subscriber(260, recv_callback_channel_1);
+    subscriber_channel_2 = channel_seed_2->new_subscriber(260, recv_callback_channel_2);
 
     publisher_channel_1->send((unsigned char *) &my_message_channel_1, sizeof(my_message_channel_1));
     publisher_channel_2->send((unsigned char *) &my_message_channel_2, sizeof(my_message_channel_2));
 
-    LED_control->turn_on(1, 1, 1, LED_DURATION);
+    LED_control->turn_on(255, 255, 255, LED_DURATION);
     LED_flag = 0;
 }
 
